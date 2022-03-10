@@ -1,0 +1,52 @@
+/*!
+ * Polkascan Calendar UI
+ * Copyright (C) 2018-2022 Polkascan Foundation (NL)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '@angular/material' as mat;
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$calendar-ui-primary: mat.define-palette(mat.$indigo-palette);
+$calendar-ui-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$calendar-ui-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$calendar-ui-theme: mat.define-light-theme((
+  color: (
+    primary: $calendar-ui-primary,
+    accent: $calendar-ui-accent,
+    warn: $calendar-ui-warn,
+  )
+));
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($calendar-ui-theme);
