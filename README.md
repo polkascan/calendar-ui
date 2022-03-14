@@ -9,13 +9,16 @@ You will need to add a file named `config.json` in `src/assets/`. This file cont
 The order in which the networks are shown in the UI is also based on this configuration. It is advised to add multiple endpoints for fallback and custom switching capabilities.
 
 ```shell
-{
-  "polkadot": {
-    "substrateRpcUrlArray": ["wss://rpc.polkadot.io"]
+  {
+  "network": {
+    "polkadot": {
+      "substrateRpcUrlArray": ["wss://rpc.polkadot.io"]
+    },
+    "kusama": {
+      "substrateRpcUrlArray": ["wss://kusama-rpc.polkadot.io", "wss://other-kusama-node.io"]
+    }
   },
-  "kusama": {
-    "substrateRpcUrlArray": ["wss://kusama-rpc.polkadot.io", "wss://other-kusama-node.io"]
-  }
+  "calendarApiUrlArray": []
 }
 ```
 

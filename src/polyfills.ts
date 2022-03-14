@@ -69,3 +69,13 @@ import 'zone.js';  // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+
+// Crypto browserify uses global in NodeJS, use window instead.
+(window as any).global = window;
+
+// Add browserify version of buffer, installed as dependency.
+(window as any).Buffer =  (window as any).buffer || require('buffer').Buffer;
+
+// Add browserify version of process, already installed as subdependency.
+(window as any).process = require('process');
+

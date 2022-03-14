@@ -17,6 +17,8 @@
  */
 
 import { Component } from '@angular/core';
+import { PolkadaptService } from './services/polkadapt.service';
+import { filter, take } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -25,4 +27,21 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'calendar-ui';
+
+  constructor(private testPolkadaptService: PolkadaptService) {
+    this.fetchSomeInformation();
+  }
+
+  async fetchSomeInformation(): Promise<void> {
+    for (let network of Object.keys(this.testPolkadaptService.networkAdapters)) {
+      this.testPolkadaptService.networkAdapters[network].connected.pipe(
+        filter((b) => b),
+        take(1)
+      ).subscribe(async (): Promise<void> => {
+        const blockTime = await this.testPolkadaptService.run(network).consts['babe']['expectedBlockTime'];
+        const bestNumber = await this.testPolkadaptService.run(network).derive.chain.bestNumber();
+        console.log(`${network} blockTime = ${(blockTime as any).toNumber()} bestNumber = ${bestNumber}`);
+      });
+    }
+  }
 }

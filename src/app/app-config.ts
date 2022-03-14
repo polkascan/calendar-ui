@@ -25,17 +25,26 @@ type NetworkConfig = {
   };
 };
 
+type Config = {
+  network: NetworkConfig,
+  calendarApiUrlArray: string[];
+};
+
 @Injectable()
 export class AppConfig {
   networks: NetworkConfig;
+  calendar: string[];
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {
+  }
+
   public load(): Promise<void> {
     return this.http
-      .get<NetworkConfig>('assets/config.json')
+      .get<Config>('assets/config.json')
       .toPromise()
-      .then(config => {
-        this.networks = config || {};
+      .then((config): void => {
+        this.networks = config && config.network || {};
+        this.calendar = config && config.calendarApiUrlArray || [];
       });
   }
 }

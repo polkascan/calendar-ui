@@ -20,7 +20,7 @@ import { Injectable } from '@angular/core';
 import { Polkadapt, PolkadaptRunConfig } from '@polkadapt/core';
 import * as substrate from '@polkadapt/substrate-rpc';
 import { AppConfig } from '../app-config';
-import { Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, throttleTime } from 'rxjs';
 
 export type AugmentedApi = substrate.Api;
 
@@ -33,9 +33,16 @@ export class PolkadaptService {
 
   badAdapterUrls: { [network: string]: { [K in AdapterName]: string[] } } = {};
 
-  availableAdapters: {
+  networkAdapters: {
     [network: string]: {
-      substrateRpc: substrate.Adapter
+      substrateRpc: substrate.Adapter;
+      url: BehaviorSubject<string>;
+      urls: BehaviorSubject<string[]>;
+      registered: BehaviorSubject<boolean>;
+      connected: BehaviorSubject<boolean>;
+      errorHandler?: () => void;
+      connectedHandler?: () => void;
+      disconnectedHandler?: () => void;
     }
   } = {};
 
@@ -53,6 +60,12 @@ export class PolkadaptService {
     this.polkadapt = new Polkadapt();
     this.run = this.polkadapt.run.bind(this.polkadapt);
 
+    for (let network of Object.keys(this.networkAdapters)) {
+      this.activateRPCAdapter(network);
+    }
+
+    // TODO Activate Calendar Adapter when available.
+
     // Create a detector for suspended computers.
     // A web worker will keep running, even if the browser tab is inactive, therefor the timer that runs in
     // the worker will only take longer if the computer is suspended or the browser got stalled.
@@ -64,17 +77,30 @@ export class PolkadaptService {
           this.triggerReconnect.next(null);
         }
       };
+      this.sleepDetectorWorker.postMessage('start');
+
     } else {
       // Web workers are not supported in this environment.
     }
+
+    window.addEventListener('online', this.onlineHandler);
+
+    // Throttle the reconnect trigger (can also be triggered from outside this service).
+    this.triggerReconnectSubscription = this.triggerReconnect
+      .pipe(throttleTime(5000))
+      .subscribe(() => this.forceReconnect());
   }
 
   setAvailableAdapters(): void {
     for (const network of Object.keys(this.config.networks)) {
-      this.availableAdapters[network] = {
+      this.networkAdapters[network] = {
         substrateRpc: new substrate.Adapter({
           chain: network
-        })
+        }),
+        url: new BehaviorSubject(''),
+        urls: new BehaviorSubject([] as string[]),
+        registered: new BehaviorSubject<boolean>(false),
+        connected: new BehaviorSubject<boolean>(false)
       };
       this.badAdapterUrls[network] = {
         substrateRpc: []
@@ -82,53 +108,115 @@ export class PolkadaptService {
     }
   }
 
-  async activateNetwork(network: string): Promise<void> {
-    // TODO activate the adapter for the added network, also create fallback functionality.
+  async activateRPCAdapter(network: string): Promise<void> {
+    this.configureSubstrateRpcUrl(network);
+    const ana = this.networkAdapters[network];
+    const sAdapter = ana.substrateRpc;
 
-    // Reconnect on sleep and/or online event.
-    // if (this.sleepDetectorWorker) {
-    //   this.sleepDetectorWorker.postMessage('start');
-    // }
-    // window.addEventListener('online', this.onlineHandler);
+    ana.errorHandler = () => {
+      this.reconnectSubstrateRpc(network);
+    };
+    sAdapter.on('error', ana.errorHandler);
+
+    ana.connectedHandler = () => {
+      ana.connected.next(true);
+    };
+    sAdapter.on('connected', ana.connectedHandler);
+
+    ana.disconnectedHandler = () => {
+      ana.connected.next(false);
+    };
+    sAdapter.on('disconnected', ana.disconnectedHandler);
+
+    ana.urls.next(this.config.networks[network].substrateRpcUrlArray);
+
+    try {
+      this.polkadapt.register(sAdapter);
+      ana.registered.next(true);
+    } catch (e) {
+      ana.registered.next(false);
+      throw e;
+    }
 
     // Wait until PolkADAPT has initialized all adapters.
     await this.polkadapt.ready();
   }
 
-  deactivateNetwork(network: string): void {
-    // TODO Unregister the adapters for the network
-    const activeAdapters: any[] = [];
+  deactivateRPCAdapter(network: string): void {
+    const ana = this.networkAdapters[network];
+    const sAdapter = ana.substrateRpc;
+    if (sAdapter) {
+      this.polkadapt.unregister(sAdapter);
+      ana.registered.next(false);
+      ana.connected.next(false);
 
-    this.polkadapt.unregister(...activeAdapters);
-
-    // if (this.sleepDetectorWorker) {
-    //   this.sleepDetectorWorker.postMessage('stop');
-    // }
-    // window.removeEventListener('online', this.onlineHandler);
-
+      if (ana.errorHandler) {
+        sAdapter.off('error', ana.errorHandler);
+      }
+      if (ana.connectedHandler) {
+        sAdapter.off('connected', ana.connectedHandler);
+      }
+      if (ana.disconnectedHandler) {
+        sAdapter.off('disconnected', ana.disconnectedHandler);
+      }
+    }
   }
 
   configureSubstrateRpcUrl(network: string): void {
+    const substrateRpcUrls = this.config.networks[network].substrateRpcUrlArray;
+    let substrateRpcUrl = window.localStorage.getItem(`lastUsedSubstrateRpcUrl-${network}`);
+    if (!substrateRpcUrl) {
+      const badSubstrateRpcUrls = this.badAdapterUrls[network].substrateRpc;
+      if (badSubstrateRpcUrls.length >= substrateRpcUrls.length) {
+        // All url's are marked bad, so let's just try all of them again.
+        badSubstrateRpcUrls.length = 0;
+      }
+      substrateRpcUrl = substrateRpcUrls.filter(url => !badSubstrateRpcUrls.includes(url))[0];
+      window.localStorage.setItem(`lastUsedSubstrateRpcUrl-${network}`, substrateRpcUrl);
+    }
+    const ana =  this.networkAdapters[network];
+    ana.substrateRpc.setUrl(substrateRpcUrl);
+    ana.url.next(substrateRpcUrl);
   }
 
   reconnectSubstrateRpc(network: string): void {
+    const ana = this.networkAdapters['network'];
+    if (ana) {
+      const url = ana.url.value;
+      if (url) {
+        const badSubstrateRpcUrls = this.badAdapterUrls[network].substrateRpc;
+        badSubstrateRpcUrls.push(url);
+        window.localStorage.removeItem(`lastUsedSubstrateRpcUrl-${network}`);
+        this.configureSubstrateRpcUrl(network);
+        if (ana.registered.value) {
+          ana.substrateRpc.connect();
+        } else {
+          this.polkadapt.register(ana.substrateRpc);
+        }
+      }
+    }
   }
 
   async setSubstrateRpcUrl(network: string, url: string): Promise<void> {
-    window.localStorage.setItem(`lastUsedSubstrateRpcUrl-${network}`, url);
-    this.availableAdapters[network].substrateRpc.setUrl(url);
-    // substrateRpcUrl.next(url);
-    // if (this.substrateRpcRegistered.value) {
-    //   await this.availableAdapters[this.currentNetwork].substrateRpc.connect();
-    // } else {
-    //   // Not registered, so let's try this url as well as the others again.
-    //   this.badAdapterUrls[this.currentNetwork].substrateRpc.length = 0;
-    //   this.polkadapt.register(this.availableAdapters[this.currentNetwork].substrateRpc);
-    // }
+    const ana = this.networkAdapters[network];
+    if (ana) {
+      window.localStorage.setItem(`lastUsedSubstrateRpcUrl-${network}`, url);
+      ana.substrateRpc.setUrl(url);
+      ana.url.next(url);
+      if (ana.registered.value) {
+        await ana.substrateRpc.connect();
+      } else {
+        // Not registered, so let's try this url as well as the others again.
+        this.badAdapterUrls[network].substrateRpc.length = 0;
+        this.polkadapt.register(ana.substrateRpc);
+      }
+    }
   }
 
 
-  forceReconnect(network: string): void {
-    this.reconnectSubstrateRpc(network);
+  forceReconnect(): void {
+    for (let network of Object.keys(this.networkAdapters)) {
+      this.reconnectSubstrateRpc(network);
+    }
   }
 }
