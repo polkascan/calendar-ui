@@ -1,5 +1,5 @@
 /*
- * Polkascan Explorer UI
+ * Polkascan Calendar UI
  * Copyright (C) 2018-2022 Polkascan Foundation (NL)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,20 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
-import { AppConfig } from '../../app-config';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ListComponent } from './list.component';
+import { RouterModule, Routes } from '@angular/router';
 
-
-@Component({
-  templateUrl: 'home.component.html',
-  styleUrls: ['home.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
-})
-export class HomeComponent {
-  networks: string[];
-
-  constructor(private config: AppConfig) {
-    this.networks = Object.keys(this.config.networks);
+const routes: Routes = [
+  {
+    path: '',
+    component: ListComponent
   }
-}
+];
+
+@NgModule({
+  declarations: [
+    ListComponent
+  ],
+  imports: [
+    RouterModule.forChild(routes),
+    CommonModule
+  ]
+})
+export class ListModule { }

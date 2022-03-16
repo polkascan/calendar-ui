@@ -16,28 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const intervalDuration = 2000;
-let runningInterval: any = null;
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
-addEventListener('message', ({data}) => {
-  if (data === 'start') {
-    let heartBeat = new Date().getTime();
-    runningInterval = setInterval(() => {
-      const systole = new Date().getTime();
+@Component({
+  selector: 'app-month',
+  templateUrl: './month.component.html',
+  styleUrls: ['./month.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class MonthComponent implements OnInit {
 
-      if ((systole - heartBeat) > (intervalDuration + 50)) {
-        // The web worker was interrupted, this probably happened because of a computer suspend or stalled browser.
-        postMessage('wake');
-      }
+  constructor() { }
 
-      heartBeat = systole;
-    }, intervalDuration)
+  ngOnInit(): void {
+    console.log('MONTH COMP');
   }
 
-  if (data === 'stop') {
-    if (runningInterval) {
-      clearInterval(runningInterval);
-      runningInterval = null;
-    }
-  }
-});
+}

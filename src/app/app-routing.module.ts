@@ -23,7 +23,7 @@ import { PageNotFoundComponent } from './pages/page-not-found/page-not-found.com
 const routes: Routes = [
   {
     path: '',
-    loadChildren: () => import('./pages/home/home.module').then(m => m.HomeModule),
+    loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule),
   },
   {path: '**', component: PageNotFoundComponent}
 ];

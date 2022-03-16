@@ -16,28 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const intervalDuration = 2000;
-let runningInterval: any = null;
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-addEventListener('message', ({data}) => {
-  if (data === 'start') {
-    let heartBeat = new Date().getTime();
-    runningInterval = setInterval(() => {
-      const systole = new Date().getTime();
+import { DayComponent } from './day.component';
 
-      if ((systole - heartBeat) > (intervalDuration + 50)) {
-        // The web worker was interrupted, this probably happened because of a computer suspend or stalled browser.
-        postMessage('wake');
-      }
+describe('DayComponent', () => {
+  let component: DayComponent;
+  let fixture: ComponentFixture<DayComponent>;
 
-      heartBeat = systole;
-    }, intervalDuration)
-  }
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ DayComponent ]
+    })
+    .compileComponents();
+  });
 
-  if (data === 'stop') {
-    if (runningInterval) {
-      clearInterval(runningInterval);
-      runningInterval = null;
-    }
-  }
+  beforeEach(() => {
+    fixture = TestBed.createComponent(DayComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
 });

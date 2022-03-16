@@ -1,5 +1,5 @@
 /*
- * Polkascan Explorer UI
+ * Polkascan Calendar UI
  * Copyright (C) 2018-2022 Polkascan Foundation (NL)
  *
  * This program is free software: you can redistribute it and/or modify

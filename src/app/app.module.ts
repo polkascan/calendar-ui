@@ -38,14 +38,13 @@ import { HttpClientModule } from '@angular/common/http';
     HttpClientModule
   ],
   providers: [
-        AppConfig,
+    AppConfig,
     {
       provide: APP_INITIALIZER,
       useFactory: initConfig,
       deps: [AppConfig],
       multi: true
-    },
-
+    }
   ],
   bootstrap: [AppComponent]
 })

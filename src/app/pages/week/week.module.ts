@@ -16,28 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const intervalDuration = 2000;
-let runningInterval: any = null;
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { WeekComponent } from './week.component';
+import { RouterModule, Routes } from '@angular/router';
 
-addEventListener('message', ({data}) => {
-  if (data === 'start') {
-    let heartBeat = new Date().getTime();
-    runningInterval = setInterval(() => {
-      const systole = new Date().getTime();
-
-      if ((systole - heartBeat) > (intervalDuration + 50)) {
-        // The web worker was interrupted, this probably happened because of a computer suspend or stalled browser.
-        postMessage('wake');
-      }
-
-      heartBeat = systole;
-    }, intervalDuration)
+const routes: Routes = [
+  {
+    path: '',
+    component: WeekComponent
   }
+];
 
-  if (data === 'stop') {
-    if (runningInterval) {
-      clearInterval(runningInterval);
-      runningInterval = null;
-    }
-  }
-});
+@NgModule({
+  declarations: [
+    WeekComponent
+  ],
+  imports: [
+    RouterModule.forChild(routes),
+    CommonModule
+  ]
+})
+export class WeekModule { }

@@ -1,5 +1,5 @@
 /*
- * Polkascan Explorer UI
+ * Polkascan Calendar UI
  * Copyright (C) 2018-2022 Polkascan Foundation (NL)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,21 +18,23 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MonthComponent } from './month.component';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './home.component';
 
 const routes: Routes = [
-  {path: '', component: HomeComponent, pathMatch: 'full'}
-]
+  {
+    path: '',
+    component: MonthComponent
+  }
+];
 
 @NgModule({
   declarations: [
-    HomeComponent,
+    MonthComponent
   ],
   imports: [
+    RouterModule.forChild(routes),
     CommonModule,
-    RouterModule.forChild(routes)
-  ]
+  ],
 })
-export class HomeModule {
-}
+export class MonthModule { }
