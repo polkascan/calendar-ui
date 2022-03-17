@@ -16,3 +16,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+.month-grid {
+  display: flex;
+  width: 100%;
+  height: 90%;
+  flex-direction: column;
+}
+
+.month-grid-day-header-row {
+  display: flex;
+  flex: none;
+  height: 2em;
+  align-items: stretch;
+  flex: 0 0 0%;
+}
+
+.month-grid-day-header-column {
+  flex: 1 1 0%;
+}
+
+.month-grid-row {
+  display: flex;
+  flex: none;
+  height: 2em;
+  align-items: stretch;
+  flex: 1 1 0%;
+}
+
+.month-grid-day-column {
+  border-collapse: collapse;
+  flex: 1 1 0%;
+}
+
+.month-grid-day-column--previous-month,
+.month-grid-day-column--next-month {
+  background: lightgray;
+}
+
+.month-grid-day-column--selected-date {
+  border: solid 1px blue;
+}
+

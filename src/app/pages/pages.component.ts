@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, ViewChild, AfterViewInit } from '@angular/core';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, pairwise, skip, startWith, take } from 'rxjs';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, filter, map, pairwise, startWith, take } from 'rxjs';
 import { MatCalendar, MatCalendarCellClassFunction } from '@angular/material/datepicker';
-import { ActivatedRoute, NavigationEnd, Params, Router, RouterEvent } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { PolkadaptService } from '../services/polkadapt.service';
 
 const viewNames = ['month', 'week', 'day'] as const;

@@ -1,1 +1,24 @@
-<p>month works!</p>
+<ng-container *ngIf="(date | async) as selectedDate">
+  <div class="month-grid">
+    <div class="month-grid-day-header-row">
+      <div class="month-grid-day-header-column">Monday</div>
+      <div class="month-grid-day-header-column">Tuesday</div>
+      <div class="month-grid-day-header-column">Wednesday</div>
+      <div class="month-grid-day-header-column">Thursday</div>
+      <div class="month-grid-day-header-column">Friday</div>
+      <div class="month-grid-day-header-column">Saturday</div>
+      <div class="month-grid-day-header-column">Sunday</div>
+    </div>
+    <div class="month-grid-row" *ngFor="let row of (columnsPerRow | async)">
+      <div class="month-grid-day-column" *ngFor="let column of row"
+           [class.month-grid-day-column--previous-month]="column.inPrevMonth"
+           [class.month-grid-day-column--next-month]="column.inNextMonth"
+           [class.month-grid-day-column--selected-date]="+column.date === +selectedDate"
+      >
+        {{ column.date | date : 'd'}}
+        {{ column.isFirstDayOfMonth ? (column.date | date : 'MMM') : '' }}
+        {{ column.isFirstDayOfYear ? (column.date | date : 'yyyy') : '' }}
+      </div>
+    </div>
+  </div>
+</ng-container>
