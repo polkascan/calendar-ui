@@ -19,6 +19,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { distinctUntilChanged, filter, map, Observable, shareReplay, startWith } from 'rxjs';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { getTodayDate } from '../../services/helpers';
 
 
 type DateColumn = {
@@ -41,12 +42,17 @@ export class MonthComponent implements OnInit {
   date: Observable<Date>;
   dates: Observable<DateColumn[]>;
   columnsPerRow: Observable<DateColumn[][]>;
+  today: Date;
+  prevMonthDate: Observable<Date>;
+  nextMonthDate: Observable<Date>;
 
   constructor(private router: Router,
               private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
+    this.today = getTodayDate();
+
     this.date = this.router.events.pipe(
       startWith(new NavigationEnd(0, '', '')),  // To trigger initialization.
       filter((event) => event instanceof NavigationEnd),
@@ -59,38 +65,37 @@ export class MonthComponent implements OnInit {
         let date = new Date(dateString + 'T00:00:00');
         // Check date for validity, by casting it to number by prefixing with a plus (+) sign.
         // If date is NaN, it's invalid, and we return the current date.
-        date = isNaN(+date) ? new Date() : date;
+        date = isNaN(+date) ? getTodayDate() : date;
         return date;
       }),
       shareReplay(1)
-    )
+    );
 
     this.dates = this.date.pipe(
-      map<Date, [Date, Date, Date]>((d) => [
+      map<Date, [Date, Date]>((d) => [
         new Date(d.getFullYear(), d.getMonth(), 1),
-        new Date(d.getFullYear(), d.getMonth() + 1, 0),
-        d
+        new Date(d.getFullYear(), d.getMonth() + 1, 0)
       ]),
       distinctUntilChanged(([afd], [bfd]) => +afd === +bfd),
-      map<[Date, Date, Date], DateColumn[]>(([firstDate, lastDate, selectedDate]): DateColumn[] => {
+      map<[Date, Date], DateColumn[]>(([firstDate, lastDate]): DateColumn[] => {
         const dates: DateColumn[] = []
 
-        const weekDay = firstDate.getDay();
-        const lastDayNr = lastDate.getDate();
-        const prepend = (weekDay === 0 ? 7 : weekDay) - 1;
-        const add = lastDayNr;
-        const lastDay = lastDate.getDay();
-        const overflow = Math.max(0, 6 - ((lastDay === 0 ? 7 : lastDay) - 1));
-        const fullYear = firstDate.getFullYear();
+        const firstWeekDay = firstDate.getDay();
+        const paddingBefore = (firstWeekDay === 0 ? 7 : firstWeekDay) - 1;
+        const dayCount = lastDate.getDate();
+        const lastWeekDay = lastDate.getDay();
+        const paddingAfter = Math.max(0, 6 - ((lastWeekDay === 0 ? 7 : lastWeekDay) - 1));
         let hasPrevYear = false;
         let hasNextYear = false;
 
         // Add days of previous month if it does not start on monday.
-        let p = prepend;
+        let p = paddingBefore;
         while (p > 0) {
           const prevDate = new Date(firstDate);
           prevDate.setDate(firstDate.getDate() - p);
-          hasPrevYear = hasPrevYear || fullYear > prevDate.getFullYear()
+          if (p === 0) {
+            hasPrevYear = prevDate.getMonth() === 11;
+          }
           dates.push({
             date: prevDate,
             inPrevMonth: true,
@@ -99,26 +104,31 @@ export class MonthComponent implements OnInit {
           p--;
         }
 
-        let a = 0; // Ignore the first
-        while (a < add + overflow) {
+        let a = 0;
+        while (a < dayCount + paddingAfter) {
           const nextDate = new Date(firstDate);
           nextDate.setDate(firstDate.getDate() + a);
+
           const dateColumn: DateColumn = {
             date: nextDate
           }
+
           if (a === 0) {
             dateColumn.isFirstDayOfMonth = true;
-          }
-          if (a >= add) {
-            hasNextYear = hasNextYear || fullYear < nextDate.getFullYear();
-            dateColumn.inNextMonth = true;
-            dateColumn.inNextYear = hasNextYear;
-            if (a === add) {
-              dateColumn.isFirstDayOfMonth = true;
+            if (nextDate.getMonth() === 0) {
+              dateColumn.isFirstDayOfYear = true;
             }
           }
-          if (hasPrevYear && a === 0 || hasNextYear && a === add) {
-            dateColumn.isFirstDayOfYear = true;
+          if (a === dayCount) {
+            hasNextYear = nextDate.getMonth() === 0;
+            dateColumn.isFirstDayOfMonth = true;
+            if (hasNextYear) {
+              dateColumn.isFirstDayOfYear = true;
+            }
+          }
+          if (a >= dayCount) {
+            dateColumn.inNextMonth = true;
+            dateColumn.inNextYear = hasNextYear;
           }
           dates.push(dateColumn);
           a++;
@@ -126,13 +136,21 @@ export class MonthComponent implements OnInit {
         return dates;
       }),
       shareReplay(1)
-    )
+    );
 
     this.columnsPerRow = this.dates.pipe(
       map<DateColumn[], DateColumn[][]>((dates) => Array.from(
-        {length: Math.ceil(dates.length / 7)},
-        (v, i) => dates.slice(i * 7, i * 7 + 7)
-      )),
-    )
+        {length: dates.length / 7},
+        (_, i) => dates.slice(i * 7, i * 7 + 7)
+      ))
+    );
+
+    this.prevMonthDate = this.date.pipe(
+      map((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
+    );
+
+    this.nextMonthDate = this.date.pipe(
+      map((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
+    );
   }
 }

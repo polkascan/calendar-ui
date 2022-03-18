@@ -16,27 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MonthComponent } from './month.component';
-import { RouterModule, Routes } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-
-const routes: Routes = [
-  {
-    path: '',
-    component: MonthComponent
-  }
-];
-
-@NgModule({
-  declarations: [
-    MonthComponent
-  ],
-  imports: [
-    RouterModule.forChild(routes),
-    CommonModule,
-    MatButtonModule
-  ],
-})
-export class MonthModule { }
+export function getTodayDate(): Date {
+  const now = new Date();
+  // This date string has to be parsed as local time, achieved by adding the time *without* timezone offset.
+  // (It's interpreted as UTC if we parse the date only.)
+  return new Date(`${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}-${('0' + now.getDate()).slice(-2)}T00:00:00`);
+}

@@ -21,6 +21,7 @@ import { BehaviorSubject, filter, map, pairwise, startWith, take } from 'rxjs';
 import { MatCalendar, MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { PolkadaptService } from '../services/polkadapt.service';
+import { getTodayDate } from '../services/helpers';
 
 const viewNames = ['month', 'week', 'day'] as const;
 type ViewName = typeof viewNames[number];
@@ -121,7 +122,7 @@ export class PagesComponent implements OnInit, AfterViewInit {
         let date = new Date(dateString+'T00:00:00');
         // Check date for validity, by casting it to number by prefixing with a plus (+) sign.
         // If date is NaN, it's invalid, and we return the current date.
-        date = isNaN(+date) ? new Date() : date;
+        date = isNaN(+date) ? getTodayDate() : date;
         return [view, date];
       }),
     ).subscribe(([view, date]) => {

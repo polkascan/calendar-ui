@@ -1,23 +1,36 @@
 <ng-container *ngIf="(date | async) as selectedDate">
-  <div class="month-grid">
-    <div class="month-grid-day-header-row">
-      <div class="month-grid-day-header-column">Monday</div>
-      <div class="month-grid-day-header-column">Tuesday</div>
-      <div class="month-grid-day-header-column">Wednesday</div>
-      <div class="month-grid-day-header-column">Thursday</div>
-      <div class="month-grid-day-header-column">Friday</div>
-      <div class="month-grid-day-header-column">Saturday</div>
-      <div class="month-grid-day-header-column">Sunday</div>
+  <div class="month-container">
+
+    <div class="month-toolbar">
+      <button mat-stroked-button [routerLink]="'/month/' + ((prevMonthDate | async) | date : 'yyyy-MM-dd')">Previous Month</button>
+      <button mat-stroked-button [routerLink]="'/month/' + ((nextMonthDate | async) | date : 'yyyy-MM-dd')">Next Month</button>
     </div>
-    <div class="month-grid-row" *ngFor="let row of (columnsPerRow | async)">
-      <div class="month-grid-day-column" *ngFor="let column of row"
-           [class.month-grid-day-column--previous-month]="column.inPrevMonth"
-           [class.month-grid-day-column--next-month]="column.inNextMonth"
-           [class.month-grid-day-column--selected-date]="+column.date === +selectedDate"
-      >
-        {{ column.date | date : 'd'}}
-        {{ column.isFirstDayOfMonth ? (column.date | date : 'MMM') : '' }}
-        {{ column.isFirstDayOfYear ? (column.date | date : 'yyyy') : '' }}
+
+    <div class="month-grid">
+      <div class="month-grid-day-header-row">
+        <div class="month-grid-day-header-column">Monday</div>
+        <div class="month-grid-day-header-column">Tuesday</div>
+        <div class="month-grid-day-header-column">Wednesday</div>
+        <div class="month-grid-day-header-column">Thursday</div>
+        <div class="month-grid-day-header-column">Friday</div>
+        <div class="month-grid-day-header-column">Saturday</div>
+        <div class="month-grid-day-header-column">Sunday</div>
+      </div>
+      <div class="month-grid-row" *ngFor="let row of (columnsPerRow | async)">
+        <div class="month-grid-day-column" *ngFor="let column of row"
+             [class.month-grid-day-column--previous-month]="column.inPrevMonth"
+             [class.month-grid-day-column--next-month]="column.inNextMonth"
+             [class.month-grid-day-column--previous-year]="column.inPrevYear"
+             [class.month-grid-day-column--next-year]="column.inNextYear"
+             [class.month-grid-day-column--selected-date]="+column.date === +selectedDate"
+             [class.month-grid-day-column--today]="+column.date === +today">
+          <div class="month-grid-day-column-label">
+            <button mat-flat-button class="month-grid-day-column-label-button" [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')">
+              {{ column.isFirstDayOfMonth ? (column.date | date : 'MMM') : '' }}
+              {{ column.date | date : 'd'}}{{ column.isFirstDayOfYear ? (column.date | date : ', yyyy') : '' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
