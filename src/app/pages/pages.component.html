@@ -1,16 +1,24 @@
-<mat-card class="calendar-card" style="width: 300px;">
-  <mat-calendar #calendar [selected]="(date | async)"
-                [dateClass]="dateClass" [startAt]="(date | async)"></mat-calendar>
-</mat-card>
+<div class="pages-grid">
+  <div class="pages-toolbar">
+    <mat-form-field appearance="fill">
+      <mat-label>View mode</mat-label>
+      <mat-select [value]="(view | async)" (selectionChange)="selectView($event.value);">
+        <mat-option value="month">Month</mat-option>
+        <mat-option value="week">Week</mat-option>
+        <mat-option value="day">Day</mat-option>
+        <mat-option value="list">List</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
-<mat-form-field appearance="fill">
-  <mat-label>View mode</mat-label>
-  <mat-select [value]="(view | async)" (selectionChange)="selectView($event.value);">
-    <mat-option value="month">Month</mat-option>
-    <mat-option value="week">Week</mat-option>
-    <mat-option value="day">Day</mat-option>
-    <mat-option value="list">List</mat-option>
-  </mat-select>
-</mat-form-field>
+  <div class="pages-date-picker">
+    <mat-card class="calendar-card" style="width: 300px;">
+      <mat-calendar #calendar [selected]="(date | async)"
+                    [dateClass]="dateClass" [startAt]="(date | async)"></mat-calendar>
+    </mat-card>
+  </div>
 
-<router-outlet></router-outlet>
+  <div class="pages-calendars">
+    <router-outlet></router-outlet>
+  </div>
+</div>

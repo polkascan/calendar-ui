@@ -16,18 +16,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-.month-container {
+.month-calendar-container {
   height: 100%;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: min-content auto;
+  grid-template-areas:
+    "toolbar"
+    "calendar";
+  grid-gap: 16px;
 }
 
-.month-grid {
+.month-toolbar {
+  grid-area: toolbar;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.month-calendar {
+  grid-area: calendar;
   display: flex;
   width: 100%;
-  height: 90%;
+  height: 100%;
   flex-direction: column;
 }
 
-.month-grid-day-header-row {
+.month-calendar-header-row {
   display: flex;
   flex: none;
   height: 2em;
@@ -36,11 +51,11 @@
   text-align: center;
 }
 
-.month-grid-day-header-column {
+.month-calendar-header-column {
   flex: 1 1 0%;
 }
 
-.month-grid-row {
+.month-calendar-row {
   display: flex;
   flex: none;
   height: 2em;
@@ -48,7 +63,7 @@
   flex: 1 1 0%;
 }
 
-.month-grid-day-column {
+.month-calendar-column {
   flex: 1 1 0%;
   border: solid 1px lightgrey;
   border-collapse: collapse;
@@ -58,34 +73,36 @@
   }
 }
 
-.month-grid-day-column--previous-month,
-.month-grid-day-column--next-month {
+.month-calendar-column--previous-month,
+.month-calendar-column--next-month {
   background: #f1f1f1;
 }
 
-.month-grid-day-column--selected-date {
-  .month-grid-day-column-label-button {
+.month-calendar-column--selected-date {
+  .month-calendar-column-label-button {
     background: #3f51b5;
     border-radius: 6px;
     color: white;
   }
 }
 
-.month-grid-day-column--today.month-grid-day-column--selected-date {
-  .month-grid-day-column-label-button {
-    box-shadow: inset 0 0 0 1px white;
-    border-color: #3f51b5;
+.month-calendar-column--today {
+  &.month-calendar-column--selected-date {
+    .month-calendar-column-label-button {
+      box-shadow: inset 0 0 0 1px white;
+      border-color: #3f51b5;
+    }
   }
 }
 
-.month-grid-day-column--today {
-  .month-grid-day-column-label-button {
+.month-calendar-column--today {
+  .month-calendar-column-label-button {
     border: solid 1px rgba(0, 0, 0, 0.38);
     border-radius: 6px;
   }
 }
 
-.month-grid-day-column-label {
+.month-calendar-column-label {
   padding: 4px 0;
   text-align: center;
 }

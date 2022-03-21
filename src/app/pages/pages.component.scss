@@ -16,3 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+.pages-grid {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: min-content auto;
+  grid-template-rows: min-content auto;
+  grid-template-areas:
+    "toolbar toolbar"
+    "datepicker calendars";
+  grid-gap: 16px;
+}
+
+.pages-toolbar {
+  grid-area: toolbar;
+}
+
+.pages-date-picker {
+  grid-area: datepicker;
+}
+
+.pages-calendars {
+  grid-area: calendars;
+}
