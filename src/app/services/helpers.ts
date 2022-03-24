@@ -16,9 +16,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { filter, map, Observable, shareReplay, startWith } from 'rxjs';
+
 export function getTodayDate(): Date {
   const now = new Date();
-  // This date string has to be parsed as local time, achieved by adding the time *without* timezone offset.
-  // (It's interpreted as UTC if we parse the date only.)
+  // This selectedDate string has to be parsed as local time, achieved by adding the time *without* timezone offset.
+  // (It's interpreted as UTC if we parse the selectedDate only.)
   return new Date(`${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}-${('0' + now.getDate()).slice(-2)}T00:00:00`);
+}
+
+export function getDateFromRoute(router: Router, route: ActivatedRoute): Observable<Date> {
+  // Listen to route changes and create a Date from the selectedDate param in the route.
+  return router.events.pipe(
+    startWith(new NavigationEnd(0, '', '')),  // To trigger initialization.
+    filter((event) => event instanceof NavigationEnd),
+    map<unknown, Date>(() => {
+      // Sanitize the url segments, so we have a selectedDate to work with.
+      const params = route.snapshot.params || {};
+      const dateString: string = String(params['date']);
+      // Like the selectedDate picker, this selectedDate string has to be parsed as local time, achieved by adding
+      // the time *without* timezone offset. (It's interpreted as UTC if we parse the selectedDate only.)
+      let date = new Date(dateString + 'T00:00:00');
+      // Check selectedDate for validity, by casting it to number by prefixing with a plus (+) sign.
+      // If selectedDate is NaN, it's invalid, and we return the current selectedDate.
+      date = isNaN(+date) ? getTodayDate() : date;
+      return date;
+    }),
+    shareReplay(1)
+  );
 }

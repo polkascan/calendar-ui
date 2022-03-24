@@ -16,27 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { WeekComponent } from './week.component';
-import { RouterModule, Routes } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-
-const routes: Routes = [
-  {
-    path: '',
-    component: WeekComponent
-  }
-];
-
-@NgModule({
-  declarations: [
-    WeekComponent
-  ],
-  imports: [
-    RouterModule.forChild(routes),
-    CommonModule,
-    MatButtonModule
-  ]
-})
-export class WeekModule { }
+export type DateColumn = {
+  date: Date;
+  inPrevMonth?: boolean;
+  inNextMonth?: boolean;
+  inPrevYear?: boolean;
+  inNextYear?: boolean;
+  isFirstDayOfMonth?: boolean;
+  isFirstDayOfYear?: boolean;
+}

@@ -16,21 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { distinctUntilChanged, filter, map, Observable, shareReplay, startWith } from 'rxjs';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { getTodayDate } from '../../services/helpers';
-
-
-type DateColumn = {
-  date: Date;
-  inPrevMonth?: boolean;
-  inNextMonth?: boolean;
-  inPrevYear?: boolean;
-  inNextYear?: boolean;
-  isFirstDayOfMonth?: boolean;
-  isFirstDayOfYear?: boolean;
-}
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { getDateFromRoute, getTodayDate } from '../../services/helpers';
+import { DateColumn } from '../types';
 
 @Component({
   selector: 'app-month',
@@ -38,7 +28,8 @@ type DateColumn = {
   styleUrls: ['./month.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MonthComponent implements OnInit {
+export class MonthComponent implements OnInit, OnDestroy {
+  destroyer = new Subject<void>();
   date: Observable<Date>;
   dates: Observable<DateColumn[]>;
   columnsPerRow: Observable<DateColumn[][]>;
@@ -53,23 +44,7 @@ export class MonthComponent implements OnInit {
   ngOnInit(): void {
     this.today = getTodayDate();
 
-    this.date = this.router.events.pipe(
-      startWith(new NavigationEnd(0, '', '')),  // To trigger initialization.
-      filter((event) => event instanceof NavigationEnd),
-      map<unknown, Date>(() => {
-        // Sanitize the url segments, so we have a date to work with.
-        const params = this.route.snapshot.params || {};
-        const dateString: string = String(params['date']);
-        // Like the date picker, this date string has to be parsed as local time, achieved by adding
-        // the time *without* timezone offset. (It's interpreted as UTC if we parse the date only.)
-        let date = new Date(dateString + 'T00:00:00');
-        // Check date for validity, by casting it to number by prefixing with a plus (+) sign.
-        // If date is NaN, it's invalid, and we return the current date.
-        date = isNaN(+date) ? getTodayDate() : date;
-        return date;
-      }),
-      shareReplay(1)
-    );
+    this.date = getDateFromRoute(this.router, this.route).pipe(takeUntil(this.destroyer));
 
     this.dates = this.date.pipe(
       map<Date, [Date, Date]>((d) => [
@@ -152,5 +127,10 @@ export class MonthComponent implements OnInit {
     this.nextMonthDate = this.date.pipe(
       map((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
     );
+  }
+
+  ngOnDestroy(): void {
+    this.destroyer.next();
+    this.destroyer.complete();
   }
 }

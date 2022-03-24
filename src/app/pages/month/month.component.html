@@ -3,7 +3,7 @@
 
     <div class="month-toolbar">
       <button mat-stroked-button [routerLink]="'/month/' + ((prevMonthDate | async) | date : 'yyyy-MM-dd')">Previous Month</button>
-      <h2>{{selectedDate | date : 'MMMM'}}</h2>
+      <h2>{{selectedDate | date: 'MMMM yyyy'}}</h2>
       <button mat-stroked-button [routerLink]="'/month/' + ((nextMonthDate | async) | date : 'yyyy-MM-dd')">Next Month</button>
     </div>
 

@@ -1,1 +1,39 @@
-<p>week works!</p>
+<ng-container *ngIf="(selectedDate | async) as selectedDate">
+  <div class="week-calendar-container" *ngIf="dates | async as dates">
+
+    <div class="week-toolbar">
+      <button mat-stroked-button [routerLink]="'/week/' + ((prevWeekDate | async) | date : 'yyyy-MM-dd')">Previous Week</button>
+
+      <h2 *ngIf="dates[0].date.getMonth() === dates[6].date.getMonth(); else spanMonths">
+        {{dates[0].date | date: 'LLLL yyyy'}}
+      </h2>
+
+      <ng-template #spanMonths>
+        <h2>
+          {{dates[0].date | date: 'LLL'}}
+          <ng-container *ngIf="dates[0].date.getMonth() === 11">{{ dates[0].date | date: 'yyyy' }}</ng-container>
+          -
+          {{dates[6].date | date: 'LLL yyyy'}}
+        </h2>
+      </ng-template>
+
+      <button mat-stroked-button [routerLink]="'/week/' + ((nextWeekDate | async) | date : 'yyyy-MM-dd')">Next Week</button>
+    </div>
+
+    <div class="week-calendar">
+      <div class="week-calendar-header-row">
+        <div class="week-calendar-header-column" *ngFor="let column of dates">
+          <button mat-flat-button class="week-calendar-column-label-button" [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')">
+            {{ column.date | date: 'cccccc d' }}
+          </button>
+        </div>
+      </div>
+      <div class="week-calendar-row">
+        <div class="week-calendar-column" *ngFor="let column of dates"
+             [class.week-calendar-column--selected-date]="+column.date === +selectedDate"
+             [class.week-calendar-column--today]="+column.date === +today">
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>

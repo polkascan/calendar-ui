@@ -45,9 +45,9 @@ export class PagesComponent implements OnInit, AfterViewInit {
   @ViewChild('calendar', {static: false}) calendar: MatCalendar<Date>;
 
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
-    // Call a Service that checks for given date whether it has events or not.
+    // Call a Service that checks for given selectedDate whether it has events or not.
     const hasEvents = false;
-    return hasEvents ? 'calendar-picker-date-has-events' : '';
+    return hasEvents ? 'calendar-picker-selectedDate-has-events' : '';
   };
 
   constructor(
@@ -59,14 +59,14 @@ export class PagesComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // Determine whether we need to change the url to selected date and view.
+    // Determine whether we need to change the url to selected selectedDate and view.
     this.navProperties.pipe(
       filter(p => Boolean(p)),  // Start processing after the properties have been initialized.
       map(p => p as NavProperties),  // Just a hint for typing purposes.
       pairwise<NavProperties>(),  // To compare old and new.
       map<(NavProperties)[], (string | null)[]>(([o, n]) => {
-        // Convert dates to ISO date strings. Because the date is in user's timezone and the UTC date can be different,
-        // we need to put the local date in the url.
+        // Convert dates to ISO selectedDate strings. Because the selectedDate is in user's timezone and the UTC selectedDate can be different,
+        // we need to put the local selectedDate in the url.
         let od = o.date;
         let odString = '';
         if (od) {
@@ -112,16 +112,16 @@ export class PagesComponent implements OnInit, AfterViewInit {
       startWith(new NavigationEnd(0, '', '')),  // To trigger initialization.
       filter((event) => event instanceof NavigationEnd),
       map<unknown, [ViewName, Date]>(() => {
-        // Sanitize the url segments, so we have a proper view name and date to work with.
+        // Sanitize the url segments, so we have a proper view name and selectedDate to work with.
         const url = this.route.snapshot.firstChild?.url;
         const view: ViewName = (url && url.length) ? url[0].path as ViewName : 'month';
         const params = this.route.snapshot.firstChild?.params || {};
         const dateString: string = String(params['date']);
-        // Like the date picker, this date string has to be parsed as local time, achieved by adding
-        // the time *without* timezone offset. (It's interpreted as UTC if we parse the date only.)
+        // Like the selectedDate picker, this selectedDate string has to be parsed as local time, achieved by adding
+        // the time *without* timezone offset. (It's interpreted as UTC if we parse the selectedDate only.)
         let date = new Date(dateString+'T00:00:00');
-        // Check date for validity, by casting it to number by prefixing with a plus (+) sign.
-        // If date is NaN, it's invalid, and we return the current date.
+        // Check selectedDate for validity, by casting it to number by prefixing with a plus (+) sign.
+        // If selectedDate is NaN, it's invalid, and we return the current selectedDate.
         date = isNaN(+date) ? getTodayDate() : date;
         return [view, date];
       }),
@@ -152,7 +152,7 @@ export class PagesComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Listen to date clicks manually.
+    // Listen to selectedDate clicks manually.
     this.calendar._userSelection.subscribe(event => {
       const date: Date | null = event.value;
       if (date) {
