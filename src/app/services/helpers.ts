@@ -17,7 +17,7 @@
  */
 
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { filter, map, Observable, shareReplay, startWith } from 'rxjs';
+import { filter, interval, map, Observable, shareReplay, startWith, takeUntil } from 'rxjs';
 
 export function getTodayDate(): Date {
   const now = new Date();
@@ -44,5 +44,22 @@ export function getDateFromRoute(router: Router, route: ActivatedRoute): Observa
       return date;
     }),
     shareReplay(1)
+  );
+}
+
+export function getCurrentTime(): Observable<Date> {
+  return interval(1000 * 60).pipe(
+    startWith(0),
+    map<number, Date>(() => new Date()),
+    shareReplay(1)
+  );
+}
+
+export function getDayProgressPercentage(date: Observable<Date>) {
+  return date.pipe(
+    map<Date, string>((date) => {
+      const minutesPassed = date.getMinutes() + (60 * date.getHours());
+      return Math.ceil(minutesPassed / (24 * 60) * 100) + '%';
+    })
   );
 }

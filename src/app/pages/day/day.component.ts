@@ -16,14 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { distinctUntilChanged, interval, map, Observable, shareReplay, startWith, Subject, takeUntil } from 'rxjs';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { distinctUntilChanged, map, Observable, Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { getDateFromRoute, getTodayDate } from '../../services/helpers';
+import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
 import { DateColumn } from '../types';
-
-const minutesPerDay = 60 * 24;
-
 
 @Component({
   selector: 'app-day',
@@ -31,7 +28,7 @@ const minutesPerDay = 60 * 24;
   styleUrls: ['./day.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DayComponent implements OnInit {
+export class DayComponent implements OnInit, OnDestroy {
   date: Observable<Date>;
   dateColumn: Observable<DateColumn>;
   today: Date;
@@ -39,6 +36,7 @@ export class DayComponent implements OnInit {
   nextDayDate: Observable<Date>;
   currentTime: Observable<Date>;
   timeLinePerc: Observable<string>;
+  hours: Observable<Date[]>;
 
   private destroyer = new Subject<void>();
 
@@ -91,20 +89,18 @@ export class DayComponent implements OnInit {
       })
     );
 
-    this.currentTime = interval(1000 * 60).pipe(
-      takeUntil(this.destroyer),
-      startWith(0),
-      map<number, Date>(() => new Date()),
-      shareReplay(1)
-    )
-
-    this.timeLinePerc = this.currentTime.pipe(
-      takeUntil(this.destroyer),
-      map<Date, string>((date) => {
-        const minutesPassed = date.getMinutes() + (60 * date.getHours());
-        return Math.floor(minutesPassed / minutesPerDay * 100) + '%';
+    this.hours = this.date.pipe(
+      map(date => {
+        const hours: Date[] = [];
+        for (let i = 1; i <= 24; i++) {
+          hours.push(new Date(+date + i * 60 * 60 * 1000));
+        }
+        return hours;
       })
-    )
+    );
+
+    this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
+    this.timeLinePerc = getDayProgressPercentage(this.currentTime);
   }
 
   ngOnDestroy(): void {

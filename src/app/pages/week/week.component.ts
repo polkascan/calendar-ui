@@ -17,7 +17,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
-import { getDateFromRoute, getTodayDate } from '../../services/helpers';
+import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
 import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { DateColumn } from '../types';
@@ -35,6 +35,9 @@ export class WeekComponent implements OnInit, OnDestroy {
   dates: Observable<DateColumn[]>;
   prevWeekDate: Observable<Date>;
   nextWeekDate: Observable<Date>;
+  hours: Observable<Date[]>;
+  currentTime: Observable<Date>;
+  timeLinePerc: Observable<string>;
 
   constructor(
     private router: Router,
@@ -49,7 +52,7 @@ export class WeekComponent implements OnInit, OnDestroy {
     // Create an Array of days of the week for given selectedDate.
     this.dates = this.selectedDate.pipe(
       map<Date, Date[]>(date => {
-        const dateMs: number = date.getTime();
+        const dateMs: number = +date;
         // Make day of week start on Monday, as defined in ISO.
         let dayOfWeek: number = date.getDay();
         if (dayOfWeek === 0) {
@@ -78,12 +81,25 @@ export class WeekComponent implements OnInit, OnDestroy {
     );
 
     this.prevWeekDate = this.dates.pipe(
-      map(dates => new Date(dates[0].date.getTime() - 7 * 24 * 60 * 60 * 1000))
+      map(dates => new Date(+dates[0].date - 7 * 24 * 60 * 60 * 1000))
     );
 
     this.nextWeekDate = this.dates.pipe(
-      map(dates => new Date(dates[0].date.getTime() + 7 * 24 * 60 * 60 * 1000))
+      map(dates => new Date(+dates[0].date + 7 * 24 * 60 * 60 * 1000))
     );
+
+    this.hours = this.dates.pipe(
+      map(dates => {
+        const hours: Date[] = [];
+        for (let i = 1; i <= 24; i++) {
+          hours.push(new Date(+dates[0].date + i * 60 * 60 * 1000));
+        }
+        return hours;
+      })
+    );
+
+    this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
+    this.timeLinePerc = getDayProgressPercentage(this.currentTime);
   }
 
   ngOnDestroy(): void {

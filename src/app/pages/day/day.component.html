@@ -14,77 +14,9 @@
 
       <div class="day-calendar-rows">
         <div class="day-calendar-row-lines">
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-timezone">{{dateColumn.date | date : 'zzz'}}</div>
-            <div class="day-calendar-row-time">01:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">02:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">03:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">04:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">05:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">06:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">07:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">08:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">09:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">10:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">11:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">12:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">13:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">14:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">15:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">16:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">17:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">18:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">19:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">20:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">21:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">22:00</div>
-          </div>
-          <div class="day-calendar-row-line">
-            <div class="day-calendar-row-time">23:00</div>
-          </div>
-          <div class="day-calendar-row-line">
+          <div class="day-calendar-row-line" *ngFor="let hour of hours | async; let i = index">
+            <div class="day-calendar-timezone" *ngIf="i === 0">{{ hour | date : 'zzz' }}</div>
+            <div class="day-calendar-row-time" *ngIf="i < 23">{{ hour | date: 'shortTime' }}</div>
           </div>
         </div>
 
@@ -93,7 +25,7 @@
         <ng-container *ngIf="dateColumn.isToday">
           <div class="day-calendar-current-time-indicator" [style.top]="timeLinePerc | async">
             <div class="day-calendar-current-time">
-              {{ (this.currentTime | async) | date : 'H:mm' }}
+              {{ (this.currentTime | async) | date: 'shortTime' }}
             </div>
           </div>
         </ng-container>

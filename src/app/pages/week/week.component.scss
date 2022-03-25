@@ -32,6 +32,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 700px;
+  justify-self: center;
+  width: 100%;
 }
 
 .week-calendar {
@@ -45,64 +48,113 @@
 .week-calendar-header-row {
   display: flex;
   flex: none;
-  height: 2em;
+  height: 3em;
   align-items: stretch;
-  flex: 0 0 0%;
+  flex: 0 0 3em;
   text-align: center;
 }
 
 .week-calendar-header-column {
-  flex: 1 1 0%;
+  flex: 1 1 0;
+}
+
+.week-calendar-header-row,
+.week-calendar-row {
+  padding-left: 6em;
 }
 
 .week-calendar-row {
+  position: relative;
   display: flex;
   flex: none;
-  height: 2em;
   align-items: stretch;
-  flex: 1 1 0%;
+  flex: 1 1 0;
+  border-right: solid 1px lightgrey;
+}
+
+.week-calendar-row-lines {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  border-top: solid 1px lightgrey;
+}
+
+.week-calendar-row-line {
+  flex: 1 1 0;
+  border-bottom: solid 1px lightgrey;
+  border-collapse: collapse;
+  position: relative;
+}
+
+.week-calendar-timezone {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: -0.65rem;
+  background: white;
+}
+
+.week-calendar-row-time {
+  position: absolute;
+  top: 100%;
+  margin-top: -0.75rem;
+  margin-left: 0.5rem;
+  background: white;
 }
 
 .week-calendar-column {
-  flex: 1 1 0%;
-  border: solid 1px lightgrey;
-  border-collapse: collapse;
+  position: relative;
+  flex: 1 1 0;
+  border-style: solid;
+  border-width: 0 0 0 1px;
+  border-color: lightgrey;
 
   .mat-flat-button {
     background-color: transparent;
   }
 }
 
-.week-calendar-column--previous-week,
-.week-calendar-column--next-week {
-  background: #f1f1f1;
-}
-
-.week-calendar-column--selected-date {
-  .week-calendar-column-label-button {
+.week-calendar-header-column--selected-date {
+  .week-calendar-header-column-button {
     background: #3f51b5;
     border-radius: 6px;
     color: white;
   }
 }
 
-.week-calendar-column--today {
-  &.week-calendar-column--selected-date {
-    .week-calendar-column-label-button {
+.week-calendar-header-column--today {
+  &.week-calendar-header-column--selected-date {
+    .week-calendar-header-column-button {
       box-shadow: inset 0 0 0 1px white;
       border-color: #3f51b5;
     }
   }
 }
 
-.week-calendar-column--today {
-  .week-calendar-column-label-button {
+.week-calendar-header-column--today {
+  .week-calendar-header-column-button {
     border: solid 1px rgba(0, 0, 0, 0.38);
     border-radius: 6px;
   }
 }
 
-.week-calendar-column-label {
-  padding: 4px 0;
-  text-align: center;
+.week-calendar-current-time-indicator {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 0;
+  border-bottom: solid 1px orangered;
+}
+
+.week-calendar-current-time {
+  position: absolute;
+  color: orangered;
+  top: -0.75rem;
+  left: 0.5rem;
+  background: white;
+  min-width: 2.5em;
 }
