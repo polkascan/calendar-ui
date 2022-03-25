@@ -20,12 +20,18 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PagesRoutingModule } from './pages-routing.module';
 import { PagesComponent } from './pages.component';
-import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_LOCALE, MatNativeDateModule, NativeDateAdapter } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
+
+class MondayFirstDateAdapter extends NativeDateAdapter {
+  override getFirstDayOfWeek(): number {
+    return 1;
+  }
+}
 
 
 @NgModule({
@@ -43,6 +49,7 @@ import { MatSelectModule } from '@angular/material/select';
   ],
   providers: [
     {provide: MAT_DATE_LOCALE, useValue: 'en-GB'},
+    {provide: DateAdapter, useClass: MondayFirstDateAdapter},
   ]
 })
 export class PagesModule { }
