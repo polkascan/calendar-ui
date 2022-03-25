@@ -24,4 +24,5 @@ export type DateColumn = {
   inNextYear?: boolean;
   isFirstDayOfMonth?: boolean;
   isFirstDayOfYear?: boolean;
+  isToday?: boolean;
 }

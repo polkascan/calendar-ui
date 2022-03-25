@@ -1,1 +1,105 @@
-<p>day works!</p>
+<ng-container *ngIf="(dateColumn | async) as dateColumn">
+  <div class="day-calendar-container">
+    <div class="day-toolbar">
+      <button mat-stroked-button [routerLink]="'/day/' + ((prevDayDate | async) | date : 'yyyy-MM-dd')">Previous Day
+      </button>
+      <h2>{{dateColumn.date | date : 'd MMMM yyyy'}}</h2>
+      <button mat-stroked-button [routerLink]="'/day/' + ((nextDayDate | async) | date : 'yyyy-MM-dd')">Next Day
+      </button>
+    </div>
+
+    <div class="day-calendar">
+      <div class="day-calendar-header-row">
+      </div>
+
+      <div class="day-calendar-rows">
+        <div class="day-calendar-row-lines">
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-timezone">{{dateColumn.date | date : 'zzz'}}</div>
+            <div class="day-calendar-row-time">01:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">02:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">03:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">04:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">05:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">06:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">07:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">08:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">09:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">10:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">11:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">12:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">13:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">14:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">15:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">16:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">17:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">18:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">19:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">20:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">21:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">22:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time">23:00</div>
+          </div>
+          <div class="day-calendar-row-line">
+          </div>
+        </div>
+
+        <div class="day-calendar-columns-line"></div>
+
+        <ng-container *ngIf="dateColumn.isToday">
+          <div class="day-calendar-current-time-indicator" [style.top]="timeLinePerc | async">
+            <div class="day-calendar-current-time">
+              {{ (this.currentTime | async) | date : 'H:mm' }}
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+    </div>
+
+  </div>
+</ng-container>

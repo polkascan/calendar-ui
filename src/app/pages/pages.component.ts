@@ -17,10 +17,9 @@
  */
 
 import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, filter, map, pairwise, startWith, take } from 'rxjs';
+import { BehaviorSubject, filter, map, pairwise, startWith } from 'rxjs';
 import { MatCalendar, MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { PolkadaptService } from '../services/polkadapt.service';
 import { getTodayDate } from '../services/helpers';
 
 const viewNames = ['month', 'week', 'day'] as const;
@@ -52,10 +51,8 @@ export class PagesComponent implements OnInit, AfterViewInit {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute,
-    private testPolkadaptService: PolkadaptService
+    private route: ActivatedRoute
   ) {
-    this.fetchSomeInformation().then();
   }
 
   ngOnInit(): void {
@@ -181,19 +178,6 @@ export class PagesComponent implements OnInit, AfterViewInit {
     if (navProps) {
       const {date} = navProps;
       this.navProperties.next({date, view});
-    }
-  }
-
-  async fetchSomeInformation(): Promise<void> {
-    for (let network of Object.keys(this.testPolkadaptService.networkAdapters)) {
-      this.testPolkadaptService.networkAdapters[network].connected.pipe(
-        filter((b) => b),
-        take(1)
-      ).subscribe(async (): Promise<void> => {
-        const blockTime = await this.testPolkadaptService.run(network).consts['babe']['expectedBlockTime'];
-        const bestNumber = await this.testPolkadaptService.run(network).derive.chain.bestNumber();
-        console.log(`${network} blockTime = ${(blockTime as any).toNumber()} bestNumber = ${bestNumber}`);
-      });
     }
   }
 }
