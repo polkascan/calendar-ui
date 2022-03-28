@@ -80,12 +80,12 @@ export class WeekComponent implements OnInit, OnDestroy {
       shareReplay(1)
     );
 
-    this.prevWeekDate = this.dates.pipe(
-      map(dates => new Date(+dates[0].date - 7 * 24 * 60 * 60 * 1000))
+    this.prevWeekDate = this.selectedDate.pipe(
+      map(date => new Date(+date - 7 * 24 * 60 * 60 * 1000))
     );
 
-    this.nextWeekDate = this.dates.pipe(
-      map(dates => new Date(+dates[0].date + 7 * 24 * 60 * 60 * 1000))
+    this.nextWeekDate = this.selectedDate.pipe(
+      map(date => new Date(+date + 7 * 24 * 60 * 60 * 1000))
     );
 
     this.hours = this.dates.pipe(

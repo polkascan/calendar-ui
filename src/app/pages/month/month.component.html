@@ -23,7 +23,6 @@
              [class.month-calendar-column--next-month]="column.inNextMonth"
              [class.month-calendar-column--previous-year]="column.inPrevYear"
              [class.month-calendar-column--next-year]="column.inNextYear"
-             [class.month-calendar-column--selected-date]="+column.date === +selectedDate"
              [class.month-calendar-column--today]="+column.date === +today">
           <div class="month-calendar-column-label">
             <button mat-flat-button class="month-calendar-column-label-button" [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')">

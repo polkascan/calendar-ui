@@ -16,6 +16,7 @@
       <mat-calendar #calendar [selected]="(date | async)"
                     [dateClass]="dateClass" [startAt]="(date | async)"></mat-calendar>
     </mat-card>
+    <div class="today-button"><button mat-stroked-button (click)="selectToday()">Today</button></div>
   </div>
 
   <div class="pages-calendars">

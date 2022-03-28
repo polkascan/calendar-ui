@@ -180,4 +180,12 @@ export class PagesComponent implements OnInit, AfterViewInit {
       this.navProperties.next({date, view});
     }
   }
+
+  selectToday(): void {
+    const navProps: NavProperties | null = this.navProperties.getValue();
+    if (navProps) {
+      const {view} = navProps;
+      this.router.navigate([view]).then();
+    }
+  }
 }

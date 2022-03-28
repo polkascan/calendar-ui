@@ -25,6 +25,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
 
 
 class MondayFirstDateAdapter extends NativeDateAdapter {
@@ -45,7 +46,8 @@ class MondayFirstDateAdapter extends NativeDateAdapter {
     MatNativeDateModule,
     PagesRoutingModule,
     MatFormFieldModule,
-    MatSelectModule
+    MatSelectModule,
+    MatButtonModule
   ],
   providers: [
     {provide: MAT_DATE_LOCALE, useValue: 'en-GB'},
