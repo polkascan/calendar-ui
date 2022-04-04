@@ -108,6 +108,3 @@ export class DayComponent implements OnInit, OnDestroy {
     this.destroyer.complete();
   }
 }
-
-
-

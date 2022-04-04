@@ -58,8 +58,7 @@ export class PagesComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     // Determine whether we need to change the url to selected selectedDate and view.
     this.navProperties.pipe(
-      filter(p => Boolean(p)),  // Start processing after the properties have been initialized.
-      map(p => p as NavProperties),  // Just a hint for typing purposes.
+      filter((p): p is NavProperties => !!p),  // Start processing after the properties have been initialized.
       pairwise<NavProperties>(),  // To compare old and new.
       map<(NavProperties)[], (string | null)[]>(([o, n]) => {
         // Convert dates to ISO selectedDate strings. Because the selectedDate is in user's timezone and the UTC selectedDate can be different,
@@ -107,8 +106,8 @@ export class PagesComponent implements OnInit, AfterViewInit {
     // Listen to navigation event and see if we need to change variables based on the url.
     this.router.events.pipe(
       startWith(new NavigationEnd(0, '', '')),  // To trigger initialization.
-      filter((event) => event instanceof NavigationEnd),
-      map<unknown, [ViewName, Date]>(() => {
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map<NavigationEnd, [ViewName, Date]>(() => {
         // Sanitize the url segments, so we have a proper view name and selectedDate to work with.
         const url = this.route.snapshot.firstChild?.url;
         const view: ViewName = (url && url.length) ? url[0].path as ViewName : 'month';
