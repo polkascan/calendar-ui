@@ -17,29 +17,103 @@
  */
 
 .pages-grid {
-  height: 100%;
+  min-height: 100%;
   width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 32px;
+
   display: grid;
   grid-template-columns: min-content auto;
   grid-template-rows: min-content auto;
   grid-template-areas:
-    "toolbar toolbar"
+    "header header"
     "datepicker calendars";
-  grid-gap: 16px;
 }
 
-.pages-toolbar {
-  grid-area: toolbar;
+.pages-header {
+  grid-area: header;
+  height: 50px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background: var(--ps-top-bar-bg-color);
+  color: var(--ps-top-bar-text-color);
+  padding: 0 16px;
+
+  .pages-today-button,
+  .pages-view-button {
+    margin-left: 10px;
+  }
+}
+
+.pages-header-bar-brand {
+  display: flex;
+  margin-right: auto;
+}
+
+.pages-header-bar-brand svg {
+  width: 93px;
+  height: 40px;
+  order: 0;
+}
+
+.pages-header-bar-brand .logo-text {
+  fill: var(--ps-top-bar-logo-text-color);
+}
+
+.pages-header-bar-brand .logo-circle {
+  fill: var(--ps-top-bar-logo-dot-color);
 }
 
 .pages-date-picker {
   grid-area: datepicker;
+  margin-left: 16px;
+  margin-right: 16px;
 }
 
 .pages-calendars {
   grid-area: calendars;
 }
 
-.today-button {
-  margin-top: 10px;
+.pages-date-picker-tools {
+  position: sticky;
+  top: 16px;
+}
+
+.calendar-picker-date-past {
+  opacity: .5;
+}
+
+.calendar-picker-date-has-events {
+  position: relative;
+
+  .mat-calendar-body-cell-content:after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    top: 6px;
+    right: 3px;
+    background: var(--ps-date-picker-event);
+    border-radius: 100%;
+    opacity: 0.8;
+  }
+}
+
+.pages-legend {
+  margin: 16px 0;
+}
+
+.pages-legend-item:before {
+  content: '\25AC';
+  margin-right: 5px;
+}
+
+.pages-legend-item--polkadot:before {
+  color: #FF6482;
+}
+
+.pages-legend-item--kusama:before {
+  color: #333;
 }

@@ -53,21 +53,21 @@
 }
 
 .month-calendar-header-column {
-  flex: 1 1 0%;
+  flex: 1 1 0;
 }
 
 .month-calendar-row {
   display: flex;
   flex: none;
-  height: 2em;
   align-items: stretch;
-  flex: 1 1 0%;
+  flex: 1 1 0;
 }
 
 .month-calendar-column {
-  flex: 1 1 0%;
+  flex: 1 1 0;
   border: solid 1px lightgrey;
-  border-collapse: collapse;
+  overflow-x: hidden;
+  min-height: 5em;
 
   .mat-flat-button {
     background-color: transparent;
@@ -79,12 +79,20 @@
   background: #f1f1f1;
 }
 
-.month-calendar-column--selected-date {
-  .month-calendar-column-label-button {
-    background: #3f51b5;
-    border-radius: 6px;
-    color: white;
-  }
+.month-calendar-column--selected {
+  box-shadow: inset 0px 1px 5px 0px #3f51b5;
+
+  //.month-calendar-column-label-button {
+  //  background: #3f51b5;
+  //  border-radius: 6px;
+  //  color: white;
+  //}
+}
+
+.month-calendar-column--past {
+   .month-calendar-column-label-button {
+     opacity: 0.6;
+   }
 }
 
 .month-calendar-column--today {
@@ -104,6 +112,45 @@
 }
 
 .month-calendar-column-label {
-  padding: 4px 0;
+  margin-left: 3px;
+  padding: 2px 0;
   text-align: center;
+}
+
+.month-calendar-item {
+  margin: 5px;
+  padding: 3px 6px;
+  font-size: 11px;
+}
+
+.month-calendar-item-description {
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.month-calendar-item-block {
+  display: inline-block;
+  margin-right: 5px;
+  padding: 2px 5px;
+  color: white;
+  white-space: nowrap;
+  font-weight: bold;
+
+  .month-calendar-item-network--polkadot & {
+    background: #FF6482;
+  }
+
+  .month-calendar-item-network--kusama & {
+    background: #333;
+  }
+}
+
+.month-calendar-item-time {
+  display: inline-block;
+  margin-right: 5px;
+  padding: 2px 5px;
+  border-radius: 6px;
+  background: lightgray;
+  color: black;
+  white-space: nowrap;
 }

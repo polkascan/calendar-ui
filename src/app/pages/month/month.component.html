@@ -19,10 +19,13 @@
       </div>
       <div class="month-calendar-row" *ngFor="let row of (columnsPerRow | async)">
         <div class="month-calendar-column" *ngFor="let column of row"
+             [class]="'month-calendar-' + (column.date | date : 'yyyy-MM-dd')"
              [class.month-calendar-column--previous-month]="column.inPrevMonth"
              [class.month-calendar-column--next-month]="column.inNextMonth"
              [class.month-calendar-column--previous-year]="column.inPrevYear"
              [class.month-calendar-column--next-year]="column.inNextYear"
+             [class.month-calendar-column--past]="+column.date < +today"
+             [class.month-calendar-column--selected]="+column.date === +selectedDate"
              [class.month-calendar-column--today]="+column.date === +today">
           <div class="month-calendar-column-label">
             <button mat-flat-button class="month-calendar-column-label-button" [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')">
@@ -30,6 +33,14 @@
               {{ column.date | date : 'd'}}{{ column.isFirstDayOfYear ? (column.date | date : ', yyyy') : '' }}
             </button>
           </div>
+          <ng-container *ngFor="let hourItems of (column.hoursWithItems | async)">
+            <div tabindex="0" *ngFor="let item of hourItems"
+                 [class]="'month-calendar-item month-calendar-item-type--' + item.type + ' month-calendar-item-network--' + item.network">
+              <span class="month-calendar-item-time">{{ item.date | date : 'HH:mm' }}</span>
+              <span class="month-calendar-item-block">{{ item.block }}</span>
+              <span class="month-calendar-item-description">{{ item.description }}</span>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>

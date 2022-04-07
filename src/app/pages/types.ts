@@ -16,6 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Observable } from 'rxjs';
+
+export type EventItem = {
+  network: string;
+  type: string;
+  date: Date;
+  block: number;
+  description: string;
+  data?: { [key: string]: any }
+};
+
 export type DateColumn = {
   date: Date;
   inPrevMonth?: boolean;
@@ -25,4 +36,19 @@ export type DateColumn = {
   isFirstDayOfMonth?: boolean;
   isFirstDayOfYear?: boolean;
   isToday?: boolean;
+  hoursWithItems?: Observable<EventItem[][]>;
+};
+
+export type PjsCalendarItemDuration = {
+  startDate?: Date;
+  endDate?: Date;
+  startBlockNumber?: number;
+  endBlockNumber?: number;
+  duration?: number;
+}
+
+export type PjsCalendarItem = PjsCalendarItemDuration & {
+  network: string;
+  type: string;
+  data: { [key: string]: any };
 }

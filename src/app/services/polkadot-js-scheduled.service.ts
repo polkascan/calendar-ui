@@ -41,6 +41,7 @@ type ChainConsts = {
   blockTime?: number;
 }
 
+export type CalenderItemsPerChain = Map<string, PjsCalendarItem[]>;
 
 
 @Injectable({
@@ -49,8 +50,8 @@ type ChainConsts = {
 export class PolkadotJsScheduledService {
   newHeads: Map<string, BehaviorSubject<Header | null>> = new Map();
   chainConstsPerChain: Map<string, ChainConsts> = new Map();
-  calendarItemsPerChain: Map<string, PjsCalendarItem[]> = new Map();
-  dataChanged = new Subject<Map<string, PjsCalendarItem[]>>();
+  calendarItemsPerChain: CalenderItemsPerChain = new Map();
+  dataChanged = new Subject<CalenderItemsPerChain>();
 
   reloadAtBlockHeight: Map<string, number> = new Map();
 
@@ -421,7 +422,7 @@ export class PolkadotJsScheduledService {
 
             const item: PjsCalendarItem = {
               network,
-              type: 'schuduler',
+              type: 'scheduler',
               endBlockNumber: scheduledBlockNumber,
               endDate: new Date(endTimestamp),
               data: {
@@ -457,7 +458,9 @@ export class PolkadotJsScheduledService {
       const item: PjsCalendarItem = Object.assign({
         network: network,
         type: 'councilElection',
-        data: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        data: {
+          electionRound: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        }
       }, itemDuration);
 
       this.addCalendarItem(network, item);
@@ -476,7 +479,9 @@ export class PolkadotJsScheduledService {
       const item: PjsCalendarItem = Object.assign({
         network: network,
         type: 'democracyLaunch',
-        data: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        data: {
+          launchPeriod: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        }
       }, itemDuration);
 
       this.addCalendarItem(network, item);
@@ -495,7 +500,9 @@ export class PolkadotJsScheduledService {
       const item: PjsCalendarItem = Object.assign({
         network: network,
         type: 'treasurySpend',
-        data: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        data: {
+          spendingPeriod: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        }
       }, itemDuration);
 
       this.addCalendarItem(network, item);
@@ -513,8 +520,10 @@ export class PolkadotJsScheduledService {
 
       const item: PjsCalendarItem = Object.assign({
         network: network,
-        type: 'societyChallenge',
-        data: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        type: 'societyRotate',
+        data: {
+          rotateRound: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        }
       }, itemDuration);
 
       this.addCalendarItem(network, item);
@@ -533,7 +542,9 @@ export class PolkadotJsScheduledService {
       const item: PjsCalendarItem = Object.assign({
         network: network,
         type: 'societyChallenge',
-        data: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        data: {
+          challengePeriod: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
+        }
       }, itemDuration);
 
       this.addCalendarItem(network, item);
@@ -551,7 +562,9 @@ export class PolkadotJsScheduledService {
       const item: PjsCalendarItem = Object.assign({
         network: network,
         type: 'parachainLease',
-        data: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number)) + 1
+        data: {
+          leasePeriod: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number)) + 1
+        }
       }, itemDuration);
 
       this.addCalendarItem(network, item);

@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
 import { ActivatedRoute, Router } from '@angular/router';
-import { distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { DateColumn } from '../types';
+import { CalendarService } from '../../services/calendar.service';
 
 @Component({
   selector: 'app-week',
@@ -32,16 +33,19 @@ export class WeekComponent implements OnInit, OnDestroy {
   destroyer = new Subject<void>();
   today: Date;
   selectedDate: Observable<Date>;
-  dates: Observable<DateColumn[]>;
+  dates: Observable<Date[]>;
+  dateColumns: Observable<DateColumn[]>
   prevWeekDate: Observable<Date>;
   nextWeekDate: Observable<Date>;
   hours: Observable<Date[]>;
   currentTime: Observable<Date>;
   timeLinePerc: Observable<string>;
+  calendarStyle = new BehaviorSubject<'fixed' | 'fluid'>('fixed');
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute) {
+    private route: ActivatedRoute,
+    private cal: CalendarService) {
   }
 
   ngOnInit(): void {
@@ -69,12 +73,17 @@ export class WeekComponent implements OnInit, OnDestroy {
       }),
       // Only continue if the first day of the week changes. It doesn't if selected selectedDate changes and stays within same week.
       distinctUntilChanged(([afd], [bfd]) => +afd === +bfd),
+      shareReplay(1)
+    );
+
+    this.dateColumns = this.dates.pipe(
       // Turn the dates into data for the template.
       map<Date[], DateColumn[]>(dates => dates.map(date => {
         return {
           date,
           isFirstDayOfMonth: date.getDate() === 1,
-          isFirstDayOfYear: date.getMonth() === 0
+          isFirstDayOfYear: date.getMonth() === 0,
+          hoursWithItems: this.cal.getEventItemsPerHour(date),
         };
       })),
       shareReplay(1)
@@ -91,8 +100,8 @@ export class WeekComponent implements OnInit, OnDestroy {
     this.hours = this.dates.pipe(
       map(dates => {
         const hours: Date[] = [];
-        for (let i = 1; i <= 24; i++) {
-          hours.push(new Date(+dates[0].date + i * 60 * 60 * 1000));
+        for (let i = 0; i < 24; i++) {
+          hours.push(new Date(+dates[0] + i * 60 * 60 * 1000));
         }
         return hours;
       })

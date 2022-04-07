@@ -21,6 +21,7 @@ import { distinctUntilChanged, map, Observable, Subject, takeUntil } from 'rxjs'
 import { ActivatedRoute, Router } from '@angular/router';
 import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
 import { DateColumn } from '../types';
+import { CalendarService } from '../../services/calendar.service';
 
 @Component({
   selector: 'app-day',
@@ -41,7 +42,8 @@ export class DayComponent implements OnInit, OnDestroy {
   private destroyer = new Subject<void>();
 
   constructor(private router: Router,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private cal: CalendarService) {
   }
 
   ngOnInit(): void {
@@ -54,6 +56,7 @@ export class DayComponent implements OnInit, OnDestroy {
       map<Date, DateColumn>((date) => {
         const dateColumn: DateColumn = {
           date: date,
+          hoursWithItems: this.cal.getEventItemsPerHour(date)
         };
 
         const dayCount = date.getDate();

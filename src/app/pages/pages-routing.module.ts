@@ -75,10 +75,10 @@ const routes: Routes = [
         matcher: dayMatcher,
         loadChildren: () => import('./day/day.module').then(m => m.DayModule),
       },
-      {
-        path: 'list/:fromDate/:toDate',
-        loadChildren: () => import('./list/list.module').then(m => m.ListModule),
-      },
+      // {
+      //   path: 'list/:fromDate/:toDate',
+      //   loadChildren: () => import('./list/list.module').then(m => m.ListModule),
+      // },
       {
         path: '',
         loadChildren: () => import('./month/month.module').then(m => m.MonthModule),

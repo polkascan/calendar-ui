@@ -16,7 +16,7 @@
         <div class="day-calendar-row-lines">
           <div class="day-calendar-row-line" *ngFor="let hour of hours | async; let i = index">
             <div class="day-calendar-timezone" *ngIf="i === 0">{{ hour | date : 'zzz' }}</div>
-            <div class="day-calendar-row-time" *ngIf="i < 23">{{ hour | date: 'shortTime' }}</div>
+            <div class="day-calendar-row-time" *ngIf="i < 23">{{ hour | date: 'HH:mm' }}</div>
           </div>
         </div>
 
@@ -25,12 +25,19 @@
         <ng-container *ngIf="dateColumn.isToday">
           <div class="day-calendar-current-time-indicator" [style.top]="timeLinePerc | async">
             <div class="day-calendar-current-time">
-              {{ (this.currentTime | async) | date: 'shortTime' }}
+              {{ (this.currentTime | async) | date: 'HH:mm' }}
             </div>
           </div>
         </ng-container>
       </div>
 
+      <div class="day-calendar-hour" *ngFor="let hourItems of (dateColumn.hoursWithItems | async)">
+        <div *ngFor="let item of hourItems" [attr.class]="'day-calendar-item day-calendar-item-network--' + item.network + ' day-calendar-item-type--' + item.type">
+          <span class="day-calendar-item-time">{{ item.date | date: 'HH:mm' }}</span>
+          <span class="day-calendar-item-block">{{ item.block }}</span>
+          <span class="day-calendar-item-description">{{ item.description }}</span>
+        </div>
+      </div>
     </div>
 
   </div>

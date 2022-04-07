@@ -16,11 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getDateFromRoute, getTodayDate } from '../../services/helpers';
-import { DateColumn } from '../types';
+import { DateColumn, EventItem } from '../types';
+import { CalendarService } from '../../services/calendar.service';
 
 @Component({
   selector: 'app-month',
@@ -28,7 +29,7 @@ import { DateColumn } from '../types';
   styleUrls: ['./month.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MonthComponent implements OnInit, OnDestroy {
+export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
   destroyer = new Subject<void>();
   date: Observable<Date>;
   dates: Observable<DateColumn[]>;
@@ -38,7 +39,9 @@ export class MonthComponent implements OnInit, OnDestroy {
   nextMonthDate: Observable<Date>;
 
   constructor(private router: Router,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private cal: CalendarService,
+              private host: ElementRef<HTMLElement>) {
   }
 
   ngOnInit(): void {
@@ -74,7 +77,8 @@ export class MonthComponent implements OnInit, OnDestroy {
           dates.push({
             date: prevDate,
             inPrevMonth: true,
-            inPrevYear: hasPrevYear
+            inPrevYear: hasPrevYear,
+            hoursWithItems: this.cal.getEventItemsPerHour(prevDate),
           });
           p--;
         }
@@ -105,6 +109,7 @@ export class MonthComponent implements OnInit, OnDestroy {
             dateColumn.inNextMonth = true;
             dateColumn.inNextYear = hasNextYear;
           }
+          dateColumn.hoursWithItems = this.cal.getEventItemsPerHour(nextDate);
           dates.push(dateColumn);
           a++;
         }
@@ -127,6 +132,24 @@ export class MonthComponent implements OnInit, OnDestroy {
     this.nextMonthDate = this.date.pipe(
       map((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
     );
+  }
+
+  ngAfterViewInit(): void {
+    this.date.subscribe(date => {
+      let m: string = (date.getMonth() + 1).toString();
+      if (m.length === 1) {
+        m = '0' + m;
+      }
+      let d: string = date.getDate().toString();
+      if (d.length === 1) {
+        d = '0' + d;
+      }
+      const dateStr = `${date.getFullYear()}-${m}-${d}`;
+      const dateEl: HTMLElement | null = this.host.nativeElement.querySelector(`.month-calendar-${dateStr}`);
+      if (dateEl) {
+        dateEl.scrollIntoView({behavior: 'smooth', block: 'end'});
+      }
+    });
   }
 
   ngOnDestroy(): void {

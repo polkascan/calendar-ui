@@ -16,11 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, filter, map, pairwise, startWith } from 'rxjs';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
+import { BehaviorSubject, filter, map, pairwise, startWith, Subject, takeUntil } from 'rxjs';
 import { MatCalendar, MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { getTodayDate } from '../services/helpers';
+import { getLocalDateString, getTodayDate } from '../services/helpers';
+import { CalendarService } from '../services/calendar.service';
 
 const viewNames = ['month', 'week', 'day'] as const;
 type ViewName = typeof viewNames[number];
@@ -34,24 +43,37 @@ type NavProperties = {
   selector: 'app-pages',
   templateUrl: './pages.component.html',
   styleUrls: ['./pages.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
-export class PagesComponent implements OnInit, AfterViewInit {
+export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   date = new BehaviorSubject<Date | null>(null);
   view = new BehaviorSubject<ViewName>('month');
   navProperties = new BehaviorSubject<NavProperties | null>(null);
 
   @ViewChild('calendar', {static: false}) calendar: MatCalendar<Date>;
 
-  dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
+  dateClassFn: MatCalendarCellClassFunction<Date> = (cellDate: Date) => {
+    const classes = [];
     // Call a Service that checks for given selectedDate whether it has events or not.
-    const hasEvents = false;
-    return hasEvents ? 'calendar-picker-selectedDate-has-events' : '';
-  };
+    // The service needs local date strings.
+    const dateKey: string = getLocalDateString(cellDate);
+    const hasEvents: boolean = this.cal.getEventItems(dateKey).getValue().length > 0;
+    if (hasEvents) {
+      classes.push('calendar-picker-date-has-events');
+    }
+    if (+cellDate < +getTodayDate()) {
+      classes.push('calendar-picker-date-past');
+    }
+    return classes.join(' ');
+  }
+
+  private destroyer = new Subject<void>();
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cal: CalendarService
   ) {
   }
 
@@ -63,43 +85,18 @@ export class PagesComponent implements OnInit, AfterViewInit {
       map<(NavProperties)[], (string | null)[]>(([o, n]) => {
         // Convert dates to ISO selectedDate strings. Because the selectedDate is in user's timezone and the UTC selectedDate can be different,
         // we need to put the local selectedDate in the url.
-        let od = o.date;
-        let odString = '';
-        if (od) {
-          let oMonth: string = (od.getMonth() + 1).toString();
-          if (oMonth.length === 1) {
-            oMonth = '0' + oMonth;
-          }
-          let oDay: string = od.getDate().toString();
-          if (oDay.length === 1) {
-            oDay = '0' + oDay;
-          }
-          odString = `${od.getFullYear()}-${oMonth}-${oDay}`;
-        }
-        let nd = n.date;
-        if (!nd) {
-          nd = new Date();
-        }
-        let nMonth: string = (nd.getMonth() + 1).toString();
-        if (nMonth.length === 1) {
-          nMonth = '0' + nMonth;
-        }
-        let nDay: string = nd.getDate().toString();
-        if (nDay.length === 1) {
-          nDay = '0' + nDay;
-        }
-        let ndString = `${nd.getFullYear()}-${nMonth}-${nDay}`;
-
-        return [odString, o.view, ndString, n.view];
+        const od: string = o.date ? getLocalDateString(o.date) : '';
+        const nd: string = getLocalDateString(n.date || new Date());
+        return [od, o.view, nd, n.view];
       })
     ).subscribe(([od, ov, nd, nv]) => {
-      const today: string = new Date().toISOString().substring(0, 10);
+      const today: string = getLocalDateString(new Date());
       let commands = [nv, nd];
       if (nd === today && nv === 'month') {
         commands = [''];
       }
       if (od && nd !== od || nv !== ov) {
-        this.router.navigate(commands).then();
+        void this.router.navigate(commands);
       }
     });
 
@@ -112,7 +109,7 @@ export class PagesComponent implements OnInit, AfterViewInit {
         const url = this.route.snapshot.firstChild?.url;
         const view: ViewName = (url && url.length) ? url[0].path as ViewName : 'month';
         const params = this.route.snapshot.firstChild?.params || {};
-        const dateString: string = String(params['date']);
+        const dateString = String(params['date']);
         // Like the selectedDate picker, this selectedDate string has to be parsed as local time, achieved by adding
         // the time *without* timezone offset. (It's interpreted as UTC if we parse the selectedDate only.)
         let date = new Date(dateString+'T00:00:00');
@@ -169,6 +166,15 @@ export class PagesComponent implements OnInit, AfterViewInit {
         }
       }
     });
+
+    this.cal.eventItemsChanged.pipe(
+      takeUntil(this.destroyer)
+    ).subscribe(() => this.calendar.updateTodaysDate());
+  }
+
+  ngOnDestroy(): void {
+    this.destroyer.next();
+    this.destroyer.complete();
   }
 
   selectView(view: ViewName): void {
@@ -184,7 +190,7 @@ export class PagesComponent implements OnInit, AfterViewInit {
     const navProps: NavProperties | null = this.navProperties.getValue();
     if (navProps) {
       const {view} = navProps;
-      this.router.navigate([view]).then();
+      void this.router.navigate([view]);
     }
   }
 }

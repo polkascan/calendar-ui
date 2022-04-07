@@ -1,5 +1,5 @@
 <ng-container *ngIf="(selectedDate | async) as selectedDate">
-  <div class="week-calendar-container" *ngIf="dates | async as dates">
+  <div class="week-calendar-container" *ngIf="dateColumns | async as dates">
 
     <div class="week-toolbar">
       <button mat-stroked-button [routerLink]="'/week/' + ((prevWeekDate | async) | date : 'yyyy-MM-dd')">Previous Week</button>
@@ -20,9 +20,10 @@
       <button mat-stroked-button [routerLink]="'/week/' + ((nextWeekDate | async) | date : 'yyyy-MM-dd')">Next Week</button>
     </div>
 
-    <div class="week-calendar">
+    <div [attr.class]="'week-calendar week-calendar--' + (calendarStyle | async)">
       <div class="week-calendar-header-row">
         <div class="week-calendar-header-column" *ngFor="let column of dates"
+             [class.week-calendar-header-column--past]="+column.date < +today"
              [class.week-calendar-header-column--today]="+column.date === +today">
           <button mat-flat-button class="week-calendar-header-column-button" [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')">
             {{ column.date | date: 'cccccc d' }}
@@ -30,18 +31,26 @@
         </div>
       </div>
       <div class="week-calendar-row">
-        <div class="week-calendar-row-lines">
-          <div class="week-calendar-row-line" *ngFor="let hour of hours | async; let i = index">
+        <div class="week-calendar-fixed-hours">
+          <div class="week-calendar-hour" *ngFor="let hour of hours | async; let i = index">
             <div class="week-calendar-timezone" *ngIf="i === 0">{{ hour | date : 'zzz' }}</div>
-            <div class="week-calendar-row-time" *ngIf="i < 23">{{ hour | date: 'shortTime' }}</div>
+            <div class="week-calendar-time" *ngIf="i > 0">{{ hour | date: 'HH:mm' }}</div>
           </div>
         </div>
         <div class="week-calendar-column" *ngFor="let column of dates"
+             [class.week-calendar-column--selected]="+column.date === +selectedDate"
              [class.week-calendar-column--today]="+column.date === +today">
+          <div class="week-calendar-hour" *ngFor="let hourItems of (column.hoursWithItems | async)">
+            <div *ngFor="let item of hourItems" [attr.class]="'week-calendar-item week-calendar-item-network--' + item.network + ' week-calendar-item-type--' + item.type">
+              <span class="week-calendar-item-time">{{ item.date | date: 'HH:mm' }}</span>
+              <span class="week-calendar-item-block">{{ item.block }}</span>
+              <span class="week-calendar-item-description">{{ item.description }}</span>
+            </div>
+          </div>
           <ng-container *ngIf="+column.date === +today">
             <div class="week-calendar-current-time-indicator" [style.top]="timeLinePerc | async">
               <div class="week-calendar-current-time">
-                {{ (this.currentTime | async) | date: 'shortTime' }}
+                {{ (this.currentTime | async) | date: 'HH:mm' }}
               </div>
             </div>
           </ng-container>

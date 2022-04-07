@@ -19,11 +19,14 @@
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, interval, map, Observable, shareReplay, startWith, takeUntil } from 'rxjs';
 
+export function getLocalDateString(date: Date): string {
+  return `${date.getFullYear()}-${('0' + String(date.getMonth() + 1)).slice(-2)}-${('0' + String(date.getDate())).slice(-2)}`;
+}
+
 export function getTodayDate(): Date {
-  const now = new Date();
-  // This selectedDate string has to be parsed as local time, achieved by adding the time *without* timezone offset.
+  // This today date string has to be parsed as local time, achieved by adding the time *without* timezone offset.
   // (It's interpreted as UTC if we parse the selectedDate only.)
-  return new Date(`${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}-${('0' + now.getDate()).slice(-2)}T00:00:00`);
+  return new Date(`${getLocalDateString(new Date())}T00:00:00`);
 }
 
 export function getDateFromRoute(router: Router, route: ActivatedRoute): Observable<Date> {
@@ -34,7 +37,7 @@ export function getDateFromRoute(router: Router, route: ActivatedRoute): Observa
     map<unknown, Date>(() => {
       // Sanitize the url segments, so we have a selectedDate to work with.
       const params = route.snapshot.params || {};
-      const dateString: string = String(params['date']);
+      const dateString = String(params['date']);
       // Like the selectedDate picker, this selectedDate string has to be parsed as local time, achieved by adding
       // the time *without* timezone offset. (It's interpreted as UTC if we parse the selectedDate only.)
       let date = new Date(dateString + 'T00:00:00');
@@ -59,7 +62,7 @@ export function getDayProgressPercentage(date: Observable<Date>) {
   return date.pipe(
     map<Date, string>((date) => {
       const minutesPassed = date.getMinutes() + (60 * date.getHours());
-      return Math.ceil(minutesPassed / (24 * 60) * 100) + '%';
+      return `${Math.round(minutesPassed / (24 * 60) * 1000) / 10}%`;
     })
   );
 }
