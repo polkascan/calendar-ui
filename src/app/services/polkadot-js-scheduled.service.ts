@@ -170,9 +170,31 @@ export class PolkadotJsScheduledService {
     this.chainConstsPerChain.set(network, consts);
 
     // For now we are only interested in Polkadot and Kusama. Therefor we fetch the blockTime from Babe.
-    const blockTime = await this.pa.run(network).consts.babe.expectedBlockTime;
-    const minBlockTime = Math.min(blockTime.toJSON() as number, 24 * 60 * 60 * 1000); // Max a day.
-    consts.blockTime = minBlockTime;
+    const blockTimes = await Promise.allSettled([
+      this.pa.run(network).consts.babe.expectedBlockTime,
+      this.pa.run(network).consts.difficulty.targetBlockTime,
+      this.pa.run(network).consts.subspace.expectedBlockTime
+    ]);
+    const blockTime = blockTimes.find(result => result.status === 'fulfilled' && !!(result as PromiseFulfilledResult<u32>).value
+    ) as PromiseFulfilledResult<u32> | undefined;
+    if (blockTime?.value) {
+      consts.blockTime = Math.min(blockTime.value.toJSON() as number, 24 * 60 * 60 * 1000); // Max a day.
+    } else {
+      try {
+        const minPeriod = (await this.pa.run(network).consts.timestamp.minimumPeriod).toJSON() as number;
+        if (minPeriod && minPeriod >= 500) {
+          consts.blockTime = minPeriod * 2;
+        }
+      } catch (e) {
+        try {
+          if (await this.pa.run(network).query.parachainSystem) {
+            consts.blockTime = defaultBlockTime * 2;
+          }
+        } catch (e) {
+          console.error(`${network}: Couldn't determine block time from on-chain data, falling back to default.`);
+        }
+      }
+    }
   }
 
   async fetchActionInfo(network: string, blockNumber: number): Promise<void> {

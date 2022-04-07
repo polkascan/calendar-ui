@@ -20,7 +20,7 @@ import { Injectable } from '@angular/core';
 import { Polkadapt, PolkadaptRunConfig } from '@polkadapt/core';
 import * as substrate from '@polkadapt/substrate-rpc';
 import { AppConfig } from '../app-config';
-import { BehaviorSubject, noop, Subject, Subscription, throttleTime } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, throttleTime } from 'rxjs';
 
 type Polkadapted<T> = {
   [K in keyof T]: T[K] extends (() => void) ? T[K] : (Polkadapted<T[K]> & Promise<T[K]>);
@@ -65,7 +65,7 @@ export class PolkadaptService {
     this.run = this.polkadapt.run.bind(this.polkadapt);
 
     for (const network of Object.keys(this.networkAdapters)) {
-      this.activateRPCAdapter(network).catch(noop);
+      void this.activateRPCAdapter(network);
     }
 
     // TODO Activate Calendar Adapter when available.
@@ -193,7 +193,7 @@ export class PolkadaptService {
         window.localStorage.removeItem(`lastUsedSubstrateRpcUrl-${network}`);
         this.configureSubstrateRpcUrl(network);
         if (ana.registered.value) {
-          ana.substrateRpc.connect().catch(noop);
+          void ana.substrateRpc.connect();
         } else {
           this.polkadapt.register(ana.substrateRpc);
         }

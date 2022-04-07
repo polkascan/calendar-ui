@@ -18,7 +18,6 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { PolkadotJsScheduledService } from './services/polkadot-js-scheduled.service';
-import { noop } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -31,7 +30,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.pjss.initialize().catch(noop);
+    void this.pjss.initialize();
   }
 
   ngOnDestroy(): void {
