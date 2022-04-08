@@ -16,6 +16,9 @@ The order in which the networks are shown in the UI is also based on this config
     },
     "kusama": {
       "substrateRpcUrlArray": ["wss://kusama-rpc.polkadot.io", "wss://other-kusama-node.io"]
+    },
+    "someParachain": {
+      "substrateRpcUrlArray": ["wss://some.parachain.network"]
     }
   },
   "calendarApiUrlArray": []
@@ -31,7 +34,7 @@ docker build -t calendar-ui .
 ```
 To run the image and start a local webserver with the application:
 ```shell
-docker run --rm -p 8000:80 explorer-ui
+docker run --rm -p 8000:80 calendar-ui
 ```
 You can now open your web browser and navigate to `http://localhost:8000/` to visit the application.
 
