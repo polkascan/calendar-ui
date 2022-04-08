@@ -45,6 +45,8 @@
   height: 100%;
   max-height: 1400px;
   flex-direction: column;
+
+  --ps-day-calendar-item-background-color: lightgray;
 }
 
 .day-calendar-header-row {
@@ -154,18 +156,7 @@
   color: white;
   white-space: nowrap;
   font-weight: bold;
-
-  .day-calendar-item-network--polkadot & {
-    background: #FF6482;
-  }
-
-  .day-calendar-item-network--kusama & {
-    background: #333;
-  }
-
-  .day-calendar-item-network--acala & {
-    background: #645aff;
-  }
+  background: var(--ps-day-calendar-item-background-color);
 }
 
 .day-calendar-item-time {

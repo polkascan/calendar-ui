@@ -108,16 +108,5 @@
 .pages-legend-item:before {
   content: '\25AC';
   margin-right: 5px;
-}
-
-.pages-legend-item--polkadot:before {
-  color: #FF6482;
-}
-
-.pages-legend-item--kusama:before {
-  color: #333;
-}
-
-.pages-legend-item--acala:before {
-  color: #645aff;
+  color: var(--ps-pages-legend-item-color);
 }

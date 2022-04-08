@@ -22,6 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
 import { DateColumn } from '../types';
 import { CalendarService } from '../../services/calendar.service';
+import { AppConfig } from '../../app-config';
 
 @Component({
   selector: 'app-day',
@@ -38,12 +39,14 @@ export class DayComponent implements OnInit, OnDestroy {
   currentTime: Observable<Date>;
   timeLinePerc: Observable<string>;
   hours: Observable<Date[]>;
+  chainColors: {[network: string]: string} = {};
 
   private destroyer = new Subject<void>();
 
   constructor(private router: Router,
               private route: ActivatedRoute,
-              private cal: CalendarService) {
+              private cal: CalendarService,
+              private config: AppConfig) {
   }
 
   ngOnInit(): void {
@@ -104,6 +107,10 @@ export class DayComponent implements OnInit, OnDestroy {
 
     this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
     this.timeLinePerc = getDayProgressPercentage(this.currentTime);
+
+    for (const n of Object.keys(this.config.networks)) {
+      this.chainColors[n] =  this.config.networks[n].color;
+    }
   }
 
   ngOnDestroy(): void {

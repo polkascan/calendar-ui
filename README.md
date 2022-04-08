@@ -12,12 +12,18 @@ The order in which the networks are shown in the UI is also based on this config
   {
   "network": {
     "polkadot": {
+      "name": "Polkadot",
+      "color": "pink",
       "substrateRpcUrlArray": ["wss://rpc.polkadot.io"]
     },
     "kusama": {
+      "name": "Kusama",
+      "color": "black",
       "substrateRpcUrlArray": ["wss://kusama-rpc.polkadot.io", "wss://other-kusama-node.io"]
     },
     "someParachain": {
+      "name": "Parachain",
+      "color": "#f00",
       "substrateRpcUrlArray": ["wss://some.parachain.network"]
     }
   },

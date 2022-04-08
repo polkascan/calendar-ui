@@ -35,7 +35,7 @@
           </div>
           <ng-container *ngFor="let hourItems of (column.hoursWithItems | async)">
             <div tabindex="0" *ngFor="let item of hourItems"
-                 [class]="'month-calendar-item month-calendar-item-type--' + item.type + ' month-calendar-item-network--' + item.network">
+                 [class]="'month-calendar-item month-calendar-item-type--' + item.type + ' month-calendar-item-network--' + item.network" [style.--ps-month-calendar-item-background-color]="chainColors[item.network]">
               <span class="month-calendar-item-time">{{ item.date | date : 'HH:mm' }}</span>
               <span class="month-calendar-item-block">{{ item.block }}</span>
               <span class="month-calendar-item-description">{{ item.description }}</span>

@@ -22,6 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { getDateFromRoute, getTodayDate } from '../../services/helpers';
 import { DateColumn, EventItem } from '../types';
 import { CalendarService } from '../../services/calendar.service';
+import { AppConfig } from '../../app-config';
 
 @Component({
   selector: 'app-month',
@@ -37,10 +38,12 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
   today: Date;
   prevMonthDate: Observable<Date>;
   nextMonthDate: Observable<Date>;
+  chainColors: {[network: string]: string} = {};
 
   constructor(private router: Router,
               private route: ActivatedRoute,
               private cal: CalendarService,
+              private config: AppConfig,
               private host: ElementRef<HTMLElement>) {
   }
 
@@ -132,6 +135,10 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nextMonthDate = this.date.pipe(
       map((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
     );
+
+    for (const n of Object.keys(this.config.networks)) {
+      this.chainColors[n] =  this.config.networks[n].color;
+    }
   }
 
   ngAfterViewInit(): void {

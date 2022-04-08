@@ -32,7 +32,8 @@
       </div>
 
       <div class="day-calendar-hour" *ngFor="let hourItems of (dateColumn.hoursWithItems | async)">
-        <div *ngFor="let item of hourItems" [attr.class]="'day-calendar-item day-calendar-item-network--' + item.network + ' day-calendar-item-type--' + item.type">
+        <div *ngFor="let item of hourItems" [attr.class]="'day-calendar-item day-calendar-item-network--' + item.network + ' day-calendar-item-type--' + item.type"
+             [style.--ps-day-calendar-item-background-color]="chainColors[item.network]">
           <span class="day-calendar-item-time">{{ item.date | date: 'HH:mm' }}</span>
           <span class="day-calendar-item-block">{{ item.block }}</span>
           <span class="day-calendar-item-description">{{ item.description }}</span>

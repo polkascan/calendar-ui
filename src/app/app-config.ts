@@ -21,6 +21,8 @@ import { HttpClient } from '@angular/common/http';
 
 type NetworkConfig = {
   [network: string]: {
+    name: string;
+    color: string;
     substrateRpcUrlArray: string[];
   };
 };

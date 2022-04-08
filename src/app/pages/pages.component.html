@@ -37,9 +37,9 @@
                       [dateClass]="dateClassFn" [startAt]="date | async"></mat-calendar>
       </mat-card>
       <div class="pages-legend">
-        <div class="pages-legend-item pages-legend-item--polkadot">Polkadot</div>
-        <div class="pages-legend-item pages-legend-item--kusama">Kusama</div>
-        <div class="pages-legend-item pages-legend-item--acala">Acala</div>
+        <ng-container *ngFor="let network of networkConfig | keyvalue">
+          <div class="pages-legend-item pages-legend-item--{{network.key}}" [style.--ps-pages-legend-item-color]="network.value.color">{{network.value.name}}</div>
+        </ng-container>
       </div>
     </div>
   </div>

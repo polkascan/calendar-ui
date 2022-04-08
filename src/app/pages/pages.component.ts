@@ -30,6 +30,7 @@ import { MatCalendar, MatCalendarCellClassFunction } from '@angular/material/dat
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { getLocalDateString, getTodayDate } from '../services/helpers';
 import { CalendarService } from '../services/calendar.service';
+import { AppConfig } from '../app-config';
 
 const viewNames = ['month', 'week', 'day'] as const;
 type ViewName = typeof viewNames[number];
@@ -50,6 +51,7 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   date = new BehaviorSubject<Date | null>(null);
   view = new BehaviorSubject<ViewName>('month');
   navProperties = new BehaviorSubject<NavProperties | null>(null);
+  networkConfig = new Map();
 
   @ViewChild('calendar', {static: false}) calendar: MatCalendar<Date>;
 
@@ -73,11 +75,16 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private cal: CalendarService
+    private cal: CalendarService,
+    private config: AppConfig
   ) {
   }
 
   ngOnInit(): void {
+    for (const n of Object.keys(this.config.networks)) {
+      this.networkConfig.set(n, this.config.networks[n]);
+    }
+
     // Determine whether we need to change the url to selected selectedDate and view.
     this.navProperties.pipe(
       filter((p): p is NavProperties => !!p),  // Start processing after the properties have been initialized.

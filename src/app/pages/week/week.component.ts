@@ -22,6 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { DateColumn } from '../types';
 import { CalendarService } from '../../services/calendar.service';
+import { AppConfig } from '../../app-config';
 
 @Component({
   selector: 'app-week',
@@ -41,11 +42,13 @@ export class WeekComponent implements OnInit, OnDestroy {
   currentTime: Observable<Date>;
   timeLinePerc: Observable<string>;
   calendarStyle = new BehaviorSubject<'fixed' | 'fluid'>('fixed');
+  chainColors: {[network: string]: string} = {};
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private cal: CalendarService) {
+    private cal: CalendarService,
+    private config: AppConfig) {
   }
 
   ngOnInit(): void {
@@ -109,6 +112,10 @@ export class WeekComponent implements OnInit, OnDestroy {
 
     this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
     this.timeLinePerc = getDayProgressPercentage(this.currentTime);
+
+    for (const n of Object.keys(this.config.networks)) {
+      this.chainColors[n] =  this.config.networks[n].color;
+    }
   }
 
   ngOnDestroy(): void {

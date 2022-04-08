@@ -45,6 +45,8 @@ $hours-width: 6em;
   width: 100%;
   height: 100%;
   flex-direction: column;
+
+  --ps-week-calendar-item-background-color: lightgray;
 }
 
 .week-calendar-header-row {
@@ -183,24 +185,13 @@ $hours-width: 6em;
   }
 }
 
+
 .week-calendar-item-block,
 .week-calendar-item-time {
   display: inline-block;
   margin-right: 5px;
   padding: 2px 5px;
   border-radius: 6px;
-  background: lightgray;
+  background: var(--ps-week-calendar-item-background-color);
   color: white;
-
-  .week-calendar-item-network--polkadot & {
-    background: #FF6482;
-  }
-
-  .week-calendar-item-network--kusama & {
-    background: #333;
-  }
-
-  .week-calendar-item-network--acala & {
-    background: #645aff;
-  }
 }
