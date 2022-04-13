@@ -1,5 +1,9 @@
 # Calendar UI
+Polkascan Calendar UI frames Polkadot as a clock and presents past and future multichain events on a single Calendar. Polkascan Foundation's hosted instance of Calendar UI can be found at: [calendar.polkascan.io](https://calendar.polkascan.io).
 
+![image](https://user-images.githubusercontent.com/14069142/162911497-be1db769-4e0d-41fe-982a-8b1773fc5c05.png)
+
+## Architecture
 Calendar UI is a client-sided [Angular](https://angular.io/) based application that utilizes [PolkADAPT](https://github.com/polkascan/polkadapt) and its Adapters to obtain data from multiple data sources. Its design is based on flat [Material](https://material.angular.io/) component design, styled in Polkascan branding.
 
 ## Configuration file
