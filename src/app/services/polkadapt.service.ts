@@ -22,11 +22,7 @@ import * as substrate from '@polkadapt/substrate-rpc';
 import { AppConfig } from '../app-config';
 import { BehaviorSubject, Subject, Subscription, throttleTime } from 'rxjs';
 
-type Polkadapted<T> = {
-  [K in keyof T]: T[K] extends (() => void) ? T[K] : (Polkadapted<T[K]> & Promise<T[K]>);
-}
-
-export type AugmentedApi = Polkadapted<substrate.Api>;
+export type AugmentedApi = substrate.Api;
 
 type AdapterName = 'substrateRpc';
 
