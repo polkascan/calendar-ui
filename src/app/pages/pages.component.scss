@@ -41,7 +41,8 @@
   padding: 0 16px;
 
   .pages-today-button,
-  .pages-view-button {
+  .pages-view-button,
+  .pages-github-link {
     margin-left: 10px;
   }
 }
@@ -63,6 +64,13 @@
 
 .pages-header-bar-brand .logo-circle {
   fill: var(--ps-top-bar-logo-dot-color);
+}
+
+.pages-github-logo {
+  margin-top: 3px;
+  width: 32px;
+  height: 32px;
+  fill: white;
 }
 
 .pages-date-picker {
