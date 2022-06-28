@@ -8,7 +8,9 @@
       "path": ".cache",
       "environment": "all"
     },
-    "defaultCollection": "@angular-eslint/schematics"
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
   },
   "projects": {
     "calendar-ui": {
@@ -127,6 +129,5 @@
         }
       }
     }
-  },
-  "defaultProject": "calendar-ui"
+  }
 }
