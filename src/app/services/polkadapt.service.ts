@@ -128,7 +128,7 @@ export class PolkadaptService {
     };
     sAdapter.on('disconnected', ana.disconnectedHandler);
 
-    ana.urls.next(this.config.networks[network].substrateRpcUrlArray);
+    ana.urls.next(Object.values(this.config.networks[network].substrateRpcUrls));
 
     try {
       this.polkadapt.register(sAdapter);
@@ -163,7 +163,7 @@ export class PolkadaptService {
   }
 
   configureSubstrateRpcUrl(network: string): void {
-    const substrateRpcUrls = this.config.networks[network].substrateRpcUrlArray;
+    const substrateRpcUrls = Object.values(this.config.networks[network].substrateRpcUrls);
     let substrateRpcUrl = window.localStorage.getItem(`lastUsedSubstrateRpcUrl-${network}`);
     if (!substrateRpcUrl) {
       const badSubstrateRpcUrls = this.badAdapterUrls[network].substrateRpc;

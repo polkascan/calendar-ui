@@ -23,9 +23,22 @@ type NetworkConfig = {
   [network: string]: {
     name: string;
     color: string;
-    substrateRpcUrlArray: string[];
+    logo?: string
+    substrateRpcUrls: { [name: string]: string };
+    parachains?: { [network: string]: ParachainConfig };
   };
 };
+
+type ParachainConfig = {
+  paraId: number;
+  homepage?: string;
+  color: string,
+  name: string;
+  common?: boolean;
+  logo: string;
+  substrateRpcUrls: { [name: string]: string };
+  parachains?: { [network: string]: ParachainConfig };
+}
 
 type Config = {
   network: NetworkConfig,
