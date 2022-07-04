@@ -26,7 +26,8 @@ export type NetworkConfig = {
 export type RelayChainConfig = {
   substrateRpcUrls: { [name: string]: string };
   name: string;
-  color: string;
+  defaultActive?: boolean;
+  color?: string;
   homepage?: string;
   logo?: string
   parachains?: { [network: string]: ParachainConfig };

@@ -39,7 +39,7 @@ export class DayComponent implements OnInit, OnDestroy {
   currentTime: Observable<Date>;
   timeLinePerc: Observable<string>;
   hours: Observable<Date[]>;
-  chainColors: {[network: string]: string} = {};
+  chainColors: {[network: string]: string | undefined} = {};
 
   private destroyer = new Subject<void>();
 

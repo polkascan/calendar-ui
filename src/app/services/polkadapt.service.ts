@@ -26,19 +26,21 @@ export type AugmentedApi = substrate.Api;
 
 type AdapterName = 'substrateRpc';
 
+export type Network = {
+  substrateRpc: substrate.Adapter;
+  url: BehaviorSubject<string>;
+  urls: BehaviorSubject<string[]>;
+  registered: BehaviorSubject<boolean>;
+  connected: BehaviorSubject<boolean>;
+  errorHandler?: () => void;
+  connectedHandler?: () => void;
+  disconnectedHandler?: () => void;
+  config: RelayChainConfig | ParachainConfig
+};
+
 export type NetworkAdapters = {
-    [network: string]: {
-      substrateRpc: substrate.Adapter;
-      url: BehaviorSubject<string>;
-      urls: BehaviorSubject<string[]>;
-      registered: BehaviorSubject<boolean>;
-      connected: BehaviorSubject<boolean>;
-      errorHandler?: () => void;
-      connectedHandler?: () => void;
-      disconnectedHandler?: () => void;
-      config: RelayChainConfig | ParachainConfig
-    }
-  }
+  [network: string]: Network
+};
 
 @Injectable({providedIn: 'root'})
 export class PolkadaptService {

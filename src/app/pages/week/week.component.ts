@@ -42,7 +42,7 @@ export class WeekComponent implements OnInit, OnDestroy {
   currentTime: Observable<Date>;
   timeLinePerc: Observable<string>;
   calendarStyle = new BehaviorSubject<'fixed' | 'fluid'>('fixed');
-  chainColors: {[network: string]: string} = {};
+  chainColors: {[network: string]: string | undefined} = {};
 
   constructor(
     private router: Router,

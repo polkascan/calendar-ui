@@ -39,7 +39,7 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
   today: Date;
   prevMonthDate: Observable<Date>;
   nextMonthDate: Observable<Date>;
-  chainColors: {[network: string]: string} = {};
+  chainColors: {[network: string]: string | undefined} = {};
 
   constructor(private router: Router,
               private route: ActivatedRoute,
