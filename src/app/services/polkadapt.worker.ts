@@ -17,7 +17,7 @@
  */
 
 const intervalDuration = 2000;
-let runningInterval: any = null;
+let runningInterval: number | null = null;
 
 addEventListener('message', ({data}) => {
   if (data === 'start') {

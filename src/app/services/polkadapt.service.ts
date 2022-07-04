@@ -19,21 +19,14 @@
 import { Injectable } from '@angular/core';
 import { Polkadapt, PolkadaptRunConfig } from '@polkadapt/core';
 import * as substrate from '@polkadapt/substrate-rpc';
-import { AppConfig } from '../app-config';
+import { AppConfig, RelayChainConfig, NetworkConfig, ParachainConfig } from '../app-config';
 import { BehaviorSubject, Subject, Subscription, throttleTime } from 'rxjs';
 
 export type AugmentedApi = substrate.Api;
 
 type AdapterName = 'substrateRpc';
 
-@Injectable({providedIn: 'root'})
-export class PolkadaptService {
-  polkadapt: Polkadapt<AugmentedApi>;
-  run: (config?: PolkadaptRunConfig | string) => AugmentedApi;
-
-  badAdapterUrls: { [network: string]: { [K in AdapterName]: string[] } } = {};
-
-  networkAdapters: {
+export type NetworkAdapters = {
     [network: string]: {
       substrateRpc: substrate.Adapter;
       url: BehaviorSubject<string>;
@@ -43,8 +36,18 @@ export class PolkadaptService {
       errorHandler?: () => void;
       connectedHandler?: () => void;
       disconnectedHandler?: () => void;
+      config: RelayChainConfig | ParachainConfig
     }
-  } = {};
+  }
+
+@Injectable({providedIn: 'root'})
+export class PolkadaptService {
+  polkadapt: Polkadapt<AugmentedApi>;
+  run: (config?: PolkadaptRunConfig | string) => AugmentedApi;
+
+  badAdapterUrls: { [network: string]: { [K in AdapterName]: string[] } } = {};
+
+  networkAdapters: NetworkAdapters = {};
 
   private sleepDetectorWorker: Worker;
   triggerReconnect: Subject<any> = new Subject();
@@ -56,7 +59,7 @@ export class PolkadaptService {
   };
 
   constructor(private config: AppConfig) {
-    this.setAvailableAdapters();
+    this.setAvailableAdapters(config.networks);
     this.polkadapt = new Polkadapt();
     this.run = this.polkadapt.run.bind(this.polkadapt);
 
@@ -91,21 +94,29 @@ export class PolkadaptService {
       .subscribe(() => this.forceReconnect());
   }
 
-  setAvailableAdapters(): void {
-    for (const network of Object.keys(this.config.networks)) {
-      this.networkAdapters[network] = {
-        substrateRpc: new substrate.Adapter({
-          chain: network
-        }),
-        url: new BehaviorSubject(''),
-        urls: new BehaviorSubject([] as string[]),
-        registered: new BehaviorSubject<boolean>(false),
-        connected: new BehaviorSubject<boolean>(false)
-      };
-      this.badAdapterUrls[network] = {
-        substrateRpc: []
-      };
-    }
+  setAvailableAdapter(network: string, config: RelayChainConfig | ParachainConfig): void {
+    this.networkAdapters[network] = {
+      substrateRpc: new substrate.Adapter({
+        chain: network
+      }),
+      url: new BehaviorSubject(''),
+      urls: new BehaviorSubject([] as string[]),
+      registered: new BehaviorSubject<boolean>(false),
+      connected: new BehaviorSubject<boolean>(false),
+      config: config
+    };
+    this.badAdapterUrls[network] = {
+      substrateRpc: []
+    };
+  }
+
+  setAvailableAdapters(config: NetworkConfig | { [network: string]: ParachainConfig }): void {
+    Object.keys(config).forEach((network) => {
+      this.setAvailableAdapter(network, config[network]);
+      if (config[network].parachains) {
+        this.setAvailableAdapters(config[network].parachains as { [network: string]: ParachainConfig })
+      }
+    });
   }
 
   async activateRPCAdapter(network: string): Promise<void> {
@@ -128,7 +139,7 @@ export class PolkadaptService {
     };
     sAdapter.on('disconnected', ana.disconnectedHandler);
 
-    ana.urls.next(Object.values(this.config.networks[network].substrateRpcUrls));
+    ana.urls.next(Object.values(ana.config.substrateRpcUrls));
 
     try {
       this.polkadapt.register(sAdapter);
@@ -163,7 +174,7 @@ export class PolkadaptService {
   }
 
   configureSubstrateRpcUrl(network: string): void {
-    const substrateRpcUrls = Object.values(this.config.networks[network].substrateRpcUrls);
+    const substrateRpcUrls = Object.values(this.networkAdapters[network].config.substrateRpcUrls);
     let substrateRpcUrl = window.localStorage.getItem(`lastUsedSubstrateRpcUrl-${network}`);
     if (!substrateRpcUrl) {
       const badSubstrateRpcUrls = this.badAdapterUrls[network].substrateRpc;
@@ -174,7 +185,7 @@ export class PolkadaptService {
       substrateRpcUrl = substrateRpcUrls.filter(url => !badSubstrateRpcUrls.includes(url))[0];
       window.localStorage.setItem(`lastUsedSubstrateRpcUrl-${network}`, substrateRpcUrl);
     }
-    const ana =  this.networkAdapters[network];
+    const ana = this.networkAdapters[network];
     ana.substrateRpc.setUrl(substrateRpcUrl);
     ana.url.next(substrateRpcUrl);
   }

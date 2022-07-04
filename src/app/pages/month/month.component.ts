@@ -20,9 +20,10 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestro
 import { distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getDateFromRoute, getTodayDate } from '../../services/helpers';
-import { DateColumn, EventItem } from '../types';
+import { DateColumn } from '../types';
 import { CalendarService } from '../../services/calendar.service';
 import { AppConfig } from '../../app-config';
+import { PolkadaptService } from '../../services/polkadapt.service';
 
 @Component({
   selector: 'app-month',
@@ -44,6 +45,7 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
               private route: ActivatedRoute,
               private cal: CalendarService,
               private config: AppConfig,
+              private pa: PolkadaptService,
               private host: ElementRef<HTMLElement>) {
   }
 
@@ -136,8 +138,8 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
       map((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
     );
 
-    for (const n of Object.keys(this.config.networks)) {
-      this.chainColors[n] =  this.config.networks[n].color;
+    for (const n of Object.keys(this.pa.networkAdapters)) {
+      this.chainColors[n] =  this.pa.networkAdapters[n].config.color;
     }
   }
 

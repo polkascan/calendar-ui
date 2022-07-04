@@ -43,7 +43,7 @@
       </mat-card>
       <div class="pages-legend">
         <ng-container *ngFor="let network of networkConfig | keyvalue">
-          <div class="pages-legend-item pages-legend-item--{{network.key}}" [style.--ps-pages-legend-item-color]="network.value.color">{{network.value.name}}</div>
+          <div class="pages-legend-item pages-legend-item--{{network.key}}" [style.--ps-pages-legend-item-color]="network.value.config.color">{{network.value.config.name}}</div>
         </ng-container>
       </div>
     </div>

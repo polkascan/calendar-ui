@@ -22,7 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
 import { DateColumn } from '../types';
 import { CalendarService } from '../../services/calendar.service';
-import { AppConfig } from '../../app-config';
+import { PolkadaptService } from '../../services/polkadapt.service';
 
 @Component({
   selector: 'app-day',
@@ -46,7 +46,7 @@ export class DayComponent implements OnInit, OnDestroy {
   constructor(private router: Router,
               private route: ActivatedRoute,
               private cal: CalendarService,
-              private config: AppConfig) {
+              private pa: PolkadaptService) {
   }
 
   ngOnInit(): void {
@@ -108,8 +108,8 @@ export class DayComponent implements OnInit, OnDestroy {
     this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
     this.timeLinePerc = getDayProgressPercentage(this.currentTime);
 
-    for (const n of Object.keys(this.config.networks)) {
-      this.chainColors[n] =  this.config.networks[n].color;
+    for (const n of Object.keys(this.pa.networkAdapters)) {
+      this.chainColors[n] =  this.pa.networkAdapters[n].config.color;
     }
   }
 

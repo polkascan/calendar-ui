@@ -31,6 +31,7 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { getLocalDateString, getTodayDate } from '../services/helpers';
 import { CalendarService } from '../services/calendar.service';
 import { AppConfig } from '../app-config';
+import { PolkadaptService } from '../services/polkadapt.service';
 
 const viewNames = ['month', 'week', 'day'] as const;
 type ViewName = typeof viewNames[number];
@@ -76,13 +77,13 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private cal: CalendarService,
-    private config: AppConfig
+    private pa: PolkadaptService
   ) {
   }
 
   ngOnInit(): void {
-    for (const n of Object.keys(this.config.networks)) {
-      this.networkConfig.set(n, this.config.networks[n]);
+    for (const n of Object.keys(this.pa.networkAdapters)) {
+      this.networkConfig.set(n, this.pa.networkAdapters[n]);
     }
 
     // Determine whether we need to change the url to selected selectedDate and view.
