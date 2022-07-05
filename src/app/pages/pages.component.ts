@@ -81,22 +81,11 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
     private cal: CalendarService,
     private config: AppConfig,
     public dialog: MatDialog,
-    private ns: NetworkService
+    public ns: NetworkService
   ) {
   }
 
   ngOnInit(): void {
-    this.ns.connecting
-      .pipe(
-        takeUntil(this.destroyer),
-        filter((l) => !l)
-      )
-      .subscribe(() => {
-        for (const [n, network] of Object.entries(this.ns.activeNetworks)) {
-          this.networkConfig.set(n, network);
-        }
-      });
-
     // Determine whether we need to change the url to selected selectedDate and view.
     this.navProperties.pipe(
       filter((p): p is NavProperties => !!p),  // Start processing after the properties have been initialized.

@@ -113,8 +113,8 @@ export class WeekComponent implements OnInit, OnDestroy {
     this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
     this.timeLinePerc = getDayProgressPercentage(this.currentTime);
 
-    for (const n of Object.keys(this.pa.networkAdapters)) {
-      this.chainColors[n] =  this.pa.networkAdapters[n].config.color;
+    for (const n of Object.keys(this.pa.networks)) {
+      this.chainColors[n] =  this.pa.networks[n].config.color;
     }
   }
 

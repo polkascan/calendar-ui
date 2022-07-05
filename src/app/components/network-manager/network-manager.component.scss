@@ -1,0 +1,12 @@
+.network-manager {
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+}
+
+.network-list {
+  flex: 0 1 auto;
+}
+.network-properties {
+  flex: 1 1 auto;
+}

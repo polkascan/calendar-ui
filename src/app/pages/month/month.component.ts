@@ -138,8 +138,8 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
       map((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
     );
 
-    for (const n of Object.keys(this.pa.networkAdapters)) {
-      this.chainColors[n] =  this.pa.networkAdapters[n].config.color;
+    for (const n of Object.keys(this.pa.networks)) {
+      this.chainColors[n] =  this.pa.networks[n].config.color;
     }
   }
 

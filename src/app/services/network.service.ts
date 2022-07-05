@@ -17,14 +17,14 @@
  */
 
 import { Injectable } from '@angular/core';
-import { NetworkAdapters, PolkadaptService } from './polkadapt.service';
+import { Network, Networks, PolkadaptService } from './polkadapt.service';
 import { BehaviorSubject } from 'rxjs';
 import { PolkadotJsScheduledService } from './polkadot-js-scheduled.service';
 
 
 @Injectable({providedIn: 'root'})
 export class NetworkService {
-  activeNetworks: NetworkAdapters = {};
+  activeNetworks = new BehaviorSubject<Network[]>([]);
   connecting = new BehaviorSubject<number>(0);
 
   constructor(private pa: PolkadaptService,
@@ -36,24 +36,31 @@ export class NetworkService {
 
     // When there are no persistent settings set, look for default active chains in the config.
     await Promise.allSettled(
-      Object.entries(this.pa.networkAdapters)
+      Object.entries(this.pa.networks)
         .filter(([_, network]) => network.config.defaultActive)
         .map(([n, _]) => this.enableNetwork(n))
     );
   }
 
-  async enableNetwork(network: string): Promise<NetworkAdapters> {
+  async enableNetwork(network: string): Promise<Networks> {
+    this.activeNetworks.value.push(this.pa.networks[network]);
+    this.activeNetworks.value.sort(
+      (a, b) => (a.config.name > b.config.name) ? 1 : (a.config.name < b.config.name) ? -1 : 0
+    )
+    this.activeNetworks.next(this.activeNetworks.value);
     this.connecting.next(this.connecting.value + 1);
-
     const result = await this.pa.activateRPCAdapter(network);
-    Object.assign(this.activeNetworks, result);
     void this.pjss.initializeChain(network);
-
     this.connecting.next(this.connecting.value - 1);
     return result;
   }
 
   disableNetwork(network: string): void {
+    const index: number = this.activeNetworks.value.indexOf(this.pa.networks[network]);
+    if (index > -1) {
+      this.activeNetworks.value.splice(index, 1);
+      this.activeNetworks.next(this.activeNetworks.value);
+    }
     this.pjss.removeChain(network);
     this.pa.deactivateRPCAdapter(network);
   }
