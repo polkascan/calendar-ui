@@ -126,6 +126,19 @@ export class PolkadotJsScheduledService {
     });
   }
 
+  removeChain(network: string): void {
+    const bs = this.newHeads.get(network);
+    this.newHeads.delete(network);
+    bs ? bs.complete() : null;
+
+    const fn = this.unsubscribeFns.get(network);
+    this.unsubscribeFns.delete(network);
+    fn ? fn() : null;
+
+    this.calendarItemsPerChain.delete(network);
+    this.dataChanged.next(this.calendarItemsPerChain);
+  }
+
   destroy(): void {
     this.newHeads.forEach((bs) => bs.complete());
     this.newHeads.clear();

@@ -19,6 +19,7 @@
 import { Injectable } from '@angular/core';
 import { NetworkAdapters, PolkadaptService } from './polkadapt.service';
 import { BehaviorSubject } from 'rxjs';
+import { PolkadotJsScheduledService } from './polkadot-js-scheduled.service';
 
 
 @Injectable({providedIn: 'root'})
@@ -26,7 +27,8 @@ export class NetworkService {
   activeNetworks: NetworkAdapters = {};
   connecting = new BehaviorSubject<number>(0);
 
-  constructor(private pa: PolkadaptService) {
+  constructor(private pa: PolkadaptService,
+              private pjss: PolkadotJsScheduledService) {
   }
 
   async initialize(): Promise<void> {
@@ -42,14 +44,17 @@ export class NetworkService {
 
   async enableNetwork(network: string): Promise<NetworkAdapters> {
     this.connecting.next(this.connecting.value + 1);
+
     const result = await this.pa.activateRPCAdapter(network);
     Object.assign(this.activeNetworks, result);
+    void this.pjss.initializeChain(network);
+
     this.connecting.next(this.connecting.value - 1);
     return result;
   }
 
-
   disableNetwork(network: string): void {
+    this.pjss.removeChain(network);
     this.pa.deactivateRPCAdapter(network);
   }
 }
