@@ -20,19 +20,26 @@ import { Injectable } from '@angular/core';
 import { Network, Networks, PolkadaptService } from './polkadapt.service';
 import { BehaviorSubject } from 'rxjs';
 import { PolkadotJsScheduledService } from './polkadot-js-scheduled.service';
+import { AppConfig, NetworkConfig, RelayChainConfig } from '../app-config';
 
 
 @Injectable({providedIn: 'root'})
 export class NetworkService {
   activeNetworks = new BehaviorSubject<Network[]>([]);
   connecting = new BehaviorSubject<number>(0);
+  customNetworks: NetworkConfig = {};
 
-  constructor(private pa: PolkadaptService,
+  constructor(private config: AppConfig,
+              private pa: PolkadaptService,
               private pjss: PolkadotJsScheduledService) {
   }
 
   async initialize(): Promise<void> {
-    // Todo, use persistent settings.
+    this.pa.setAvailableAdapters(this.config.networks);
+    try {
+      this.customNetworks = JSON.parse(localStorage['customNetworks']);
+    } catch (e) {}
+    this.pa.setAvailableAdapters(this.customNetworks, true);
 
     // When there are no persistent settings set, look for default active chains in the config.
     await Promise.allSettled(
@@ -63,5 +70,25 @@ export class NetworkService {
     }
     this.pjss.removeChain(network);
     this.pa.deactivateRPCAdapter(network);
+  }
+
+  setCustomNetwork(key: string, name: string, substrateUrl: string): Network {
+    if (!this.customNetworks) {
+      this.customNetworks = {};
+    }
+    const custom: RelayChainConfig = {
+      name,
+      substrateRpcUrls: {'Custom': substrateUrl}
+    };
+    if (!this.customNetworks[key]) {
+      // New one.
+      this.pa.setAvailableAdapter(key, custom);
+    }
+    this.customNetworks[key] = custom;
+    localStorage['customNetworks'] = JSON.stringify(this.customNetworks);
+    const network: Network = this.pa.networks[key];
+    this.activeNetworks.value.splice(0, 0, network);
+    this.activeNetworks.next(this.activeNetworks.value);
+    return network;
   }
 }

@@ -36,6 +36,7 @@ export type Network = {
   connectedHandler?: () => void;
   disconnectedHandler?: () => void;
   config: RelayChainConfig | ParachainConfig;
+  isCustom?: boolean;
 };
 
 export type Networks = {
@@ -60,8 +61,7 @@ export class PolkadaptService {
     this.triggerReconnect.next(null);
   };
 
-  constructor(private config: AppConfig) {
-    this.setAvailableAdapters(config.networks);
+  constructor() {
     this.polkadapt = new Polkadapt();
     this.run = this.polkadapt.run.bind(this.polkadapt);
 
@@ -90,7 +90,7 @@ export class PolkadaptService {
       .subscribe(() => this.forceReconnect());
   }
 
-  setAvailableAdapter(network: string, config: RelayChainConfig | ParachainConfig): void {
+  setAvailableAdapter(network: string, config: RelayChainConfig | ParachainConfig, isCustom=false): void {
     this.networks[network] = {
       substrateRpc: new substrate.Adapter({
         chain: network
@@ -99,16 +99,17 @@ export class PolkadaptService {
       urls: new BehaviorSubject<string[]>(Object.values(config.substrateRpcUrls)),
       registered: new BehaviorSubject<boolean>(false),
       connected: new BehaviorSubject<boolean>(false),
-      config
+      config,
+      isCustom
     };
     this.badAdapterUrls[network] = {
       substrateRpc: []
     };
   }
 
-  setAvailableAdapters(config: NetworkConfig | { [network: string]: ParachainConfig }): void {
+  setAvailableAdapters(config: NetworkConfig | { [network: string]: ParachainConfig }, isCustom=false): void {
     Object.entries(config).forEach(([network, config]) => {
-      this.setAvailableAdapter(network, config);
+      this.setAvailableAdapter(network, config, isCustom);
       if (config.parachains) {
         this.setAvailableAdapters(config.parachains as { [network: string]: ParachainConfig })
       }

@@ -15,7 +15,6 @@ import { NetworkService } from '../../services/network.service';
 export class NetworkManager implements OnInit, OnDestroy {
   destroyer = new Subject<void>();
   networks = new BehaviorSubject<Network[]>([]);
-  customNetworks = new BehaviorSubject<Network[]>([]);
   networkActiveFormControls = new Map<Network, FormControl<boolean|null>>();
   selectedNetwork = new BehaviorSubject<Network | null>(null);
   networkForm = new FormGroup({
@@ -68,7 +67,18 @@ export class NetworkManager implements OnInit, OnDestroy {
       }
     });
 
-    this.networkForm.controls.active.valueChanges.subscribe(active => {
+    for (const [network, control] of this.networkActiveFormControls.entries()) {
+      control.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
+        const networkName: string = network.substrateRpc.chain;
+        if (active) {
+          this.ns.enableNetwork(networkName).then();
+        } else {
+          this.ns.disableNetwork(networkName);
+        }
+      });
+    }
+
+    this.networkForm.controls.active.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
       const selectedNetwork: Network | null = this.selectedNetwork.value;
       if (selectedNetwork) {
         const networkName: string = selectedNetwork.substrateRpc.chain;
@@ -77,11 +87,15 @@ export class NetworkManager implements OnInit, OnDestroy {
         } else {
           this.ns.disableNetwork(networkName);
         }
-        this.networkActiveFormControls.get(selectedNetwork)!.reset(active, {emitEvent: false});
       }
     });
-    this.networkForm.controls.url.valueChanges.subscribe(url => {});
-    this.networkForm.controls.name.valueChanges.subscribe(name => {});
+    this.networkForm.controls.name.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(name => {
+      if (this.selectedNetwork.value!.isCustom) {
+        this.selectedNetwork.value!.config.name = name || '';
+        this.networks.next(this.networks.value);
+        this.ns.activeNetworks.next(this.ns.activeNetworks.value);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -93,37 +107,42 @@ export class NetworkManager implements OnInit, OnDestroy {
     this.selectedNetwork.next(network);
   }
 
-  selectUrl(): void {
-
+  connectSelectedNetwork(): void {
+    this.selectedNetwork.value;
   }
 
   addCustomNetwork(): void {
-    const network: Network = {
-      connected: new BehaviorSubject<boolean>(false),
-      registered: new BehaviorSubject<boolean>(false),
-      substrateRpc: new Adapter({
-        chain: 'custom' + Math.round(Math.random() * 1000000),
-      }),
-      config: {
-        name: 'My Custom Network',
-        substrateRpcUrls: {},
-      },
-      url: new BehaviorSubject<string>(''),
-      urls: new BehaviorSubject<string[]>([]),
-    };
-    this.customNetworks.value.push(network);
-    this.customNetworks.next(this.customNetworks.value);
+    const network: Network = this.ns.setCustomNetwork('custom' + new Date().getTime(), 'My Custom Network', '');
+    this.networks.value.splice(0, 0, network);
+    this.networks.next(this.networks.value);
+    const control = new FormControl<boolean|null>(true);
+    this.networkActiveFormControls.set(network, control);
+    control.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
+      const networkName: string = network.substrateRpc.chain;
+      if (active) {
+        this.ns.enableNetwork(networkName).then();
+      } else {
+        this.ns.disableNetwork(networkName);
+      }
+    });
     this.selectNetwork(network);
+    this.networkForm.controls.active.setValue(true, {emitEvent: false});
   }
 
   deleteCustomNetwork(network: Network): void {
     if (network === this.selectedNetwork.value) {
       this.selectedNetwork.next(null);
     }
-    const index: number = this.customNetworks.value.indexOf(network);
+    this.networkActiveFormControls.delete(network);
+    let index: number = this.networks.value.indexOf(network);
     if (index > -1) {
-      this.customNetworks.value.splice(index, 1);
-      this.customNetworks.next(this.customNetworks.value);
+      this.networks.value.splice(index, 1);
+      this.networks.next(this.networks.value);
+    }
+    index = this.ns.activeNetworks.value.indexOf(network);
+    if (index > -1) {
+      this.ns.activeNetworks.value.splice(index, 1);
+      this.ns.activeNetworks.next(this.ns.activeNetworks.value);
     }
   }
 
