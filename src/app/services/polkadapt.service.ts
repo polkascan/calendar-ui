@@ -65,12 +65,6 @@ export class PolkadaptService {
     this.polkadapt = new Polkadapt();
     this.run = this.polkadapt.run.bind(this.polkadapt);
 
-    for (const network of Object.keys(this.networkAdapters)) {
-      void this.activateRPCAdapter(network);
-    }
-
-    // TODO Activate Calendar Adapter when available.
-
     // Create a detector for suspended computers.
     // A web worker will keep running, even if the browser tab is inactive, therefor the timer that runs in
     // the worker will only take longer if the computer is suspended or the browser got stalled.
@@ -113,18 +107,21 @@ export class PolkadaptService {
   }
 
   setAvailableAdapters(config: NetworkConfig | { [network: string]: ParachainConfig }): void {
-    Object.keys(config).forEach((network) => {
-      this.setAvailableAdapter(network, config[network]);
-      if (config[network].parachains) {
-        this.setAvailableAdapters(config[network].parachains as { [network: string]: ParachainConfig })
+    Object.entries(config).forEach(([network, config]) => {
+      this.setAvailableAdapter(network, config);
+      if (config.parachains) {
+        this.setAvailableAdapters(config.parachains as { [network: string]: ParachainConfig })
       }
     });
   }
 
-  async activateRPCAdapter(network: string): Promise<void> {
+  async activateRPCAdapter(network: string): Promise<NetworkAdapters> {
     this.configureSubstrateRpcUrl(network);
     const ana = this.networkAdapters[network];
     const sAdapter = ana.substrateRpc;
+
+    const response: NetworkAdapters = {};
+    response[network] = ana;
 
     ana.errorHandler = () => {
       this.reconnectSubstrateRpc(network);
@@ -153,6 +150,8 @@ export class PolkadaptService {
 
     // Wait until PolkADAPT has initialized all adapters.
     await this.polkadapt.ready();
+
+    return response;
   }
 
   deactivateRPCAdapter(network: string): void {

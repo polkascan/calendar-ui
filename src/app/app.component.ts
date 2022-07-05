@@ -18,6 +18,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { PolkadotJsScheduledService } from './services/polkadot-js-scheduled.service';
+import { NetworkService } from './services/network.service';
 
 @Component({
   selector: 'app-root',
@@ -25,11 +26,13 @@ import { PolkadotJsScheduledService } from './services/polkadot-js-scheduled.ser
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
-
-  constructor(private pjss: PolkadotJsScheduledService) {
+  constructor(
+    private ns: NetworkService,
+    private pjss: PolkadotJsScheduledService) {
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.ns.initialize();
     void this.pjss.initialize();
   }
 

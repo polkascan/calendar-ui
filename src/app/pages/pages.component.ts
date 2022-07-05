@@ -33,7 +33,7 @@ import { CalendarService } from '../services/calendar.service';
 import { AppConfig } from '../app-config';
 import { NetworkManager } from '../components/network-manager/network-manager.component';
 import { MatDialog } from '@angular/material/dialog';
-import { PolkadaptService } from '../services/polkadapt.service';
+import { NetworkService } from '../services/network.service';
 
 const viewNames = ['month', 'week', 'day'] as const;
 type ViewName = typeof viewNames[number];
@@ -81,14 +81,21 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
     private cal: CalendarService,
     private config: AppConfig,
     public dialog: MatDialog,
-    private pa: PolkadaptService
+    private ns: NetworkService
   ) {
   }
 
   ngOnInit(): void {
-    for (const n of Object.keys(this.pa.networkAdapters)) {
-      this.networkConfig.set(n, this.pa.networkAdapters[n]);
-    }
+    this.ns.connecting
+      .pipe(
+        takeUntil(this.destroyer),
+        filter((l) => !l)
+      )
+      .subscribe(() => {
+        for (const [n, network] of Object.entries(this.ns.activeNetworks)) {
+          this.networkConfig.set(n, network);
+        }
+      });
 
     // Determine whether we need to change the url to selected selectedDate and view.
     this.navProperties.pipe(
@@ -124,7 +131,7 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
         const dateString = String(params['date']);
         // Like the selectedDate picker, this selectedDate string has to be parsed as local time, achieved by adding
         // the time *without* timezone offset. (It's interpreted as UTC if we parse the selectedDate only.)
-        let date = new Date(dateString+'T00:00:00');
+        let date = new Date(dateString + 'T00:00:00');
         // Check selectedDate for validity, by casting it to number by prefixing with a plus (+) sign.
         // If selectedDate is NaN, it's invalid, and we return the current selectedDate.
         date = isNaN(+date) ? getTodayDate() : date;
