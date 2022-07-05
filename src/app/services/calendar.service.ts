@@ -69,6 +69,15 @@ export class CalendarService {
         }
       });
     });
+
+    // If there are no more items on a specific date, empty the observables value;
+    for (const dateKey of Object.keys(this.eventItems)) {
+      if (!(dateKey in byDate)) {
+        this.getEventItems(dateKey).next([]);
+      }
+    }
+
+    // Add items to their date containers.
     for (const [dateKey, items] of Object.entries(byDate)) {
       this.getEventItems(dateKey).next(items);
     }
