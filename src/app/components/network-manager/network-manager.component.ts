@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatestWith, mergeWith, skip, Subject, takeUntil } from 'rxjs';
-import { PolkadaptService, Network } from '../../services/polkadapt.service';
-import { Adapter } from '@polkadapt/substrate-rpc';
+import { Network, PolkadaptService } from '../../services/polkadapt.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NetworkService } from '../../services/network.service';
 
@@ -71,9 +70,11 @@ export class NetworkManager implements OnInit, OnDestroy {
       control.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
         const networkName: string = network.substrateRpc.chain;
         if (active) {
-          this.ns.enableNetwork(networkName).then();
+          void this.ns.enableNetwork(networkName);
+          this.ns.storeActivateNetworks();
         } else {
           this.ns.disableNetwork(networkName);
+          this.ns.storeActivateNetworks();
         }
       });
     }
@@ -83,9 +84,11 @@ export class NetworkManager implements OnInit, OnDestroy {
       if (selectedNetwork) {
         const networkName: string = selectedNetwork.substrateRpc.chain;
         if (active) {
-          this.ns.enableNetwork(networkName).then();
+          void this.ns.enableNetwork(networkName);
+          this.ns.storeActivateNetworks();
         } else {
           this.ns.disableNetwork(networkName);
+          this.ns.storeActivateNetworks();
         }
       }
     });
@@ -112,7 +115,7 @@ export class NetworkManager implements OnInit, OnDestroy {
   }
 
   addCustomNetwork(): void {
-    const network: Network = this.ns.setCustomNetwork('custom' + new Date().getTime(), 'My Custom Network', '');
+    const network: Network = this.ns.setCustomNetwork(`custom${new Date().getTime()}`, 'My Custom Network', '');
     this.networks.value.splice(0, 0, network);
     this.networks.next(this.networks.value);
     const control = new FormControl<boolean|null>(true);
@@ -120,9 +123,11 @@ export class NetworkManager implements OnInit, OnDestroy {
     control.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
       const networkName: string = network.substrateRpc.chain;
       if (active) {
-        this.ns.enableNetwork(networkName).then();
+        void this.ns.enableNetwork(networkName);
+        this.ns.storeActivateNetworks();
       } else {
         this.ns.disableNetwork(networkName);
+        this.ns.storeActivateNetworks();
       }
     });
     this.selectNetwork(network);
@@ -143,7 +148,7 @@ export class NetworkManager implements OnInit, OnDestroy {
     if (index > -1) {
       this.ns.activeNetworks.value.splice(index, 1);
       this.ns.activeNetworks.next(this.ns.activeNetworks.value);
+      this.ns.storeActivateNetworks();
     }
   }
-
 }

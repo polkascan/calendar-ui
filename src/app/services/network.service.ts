@@ -37,16 +37,35 @@ export class NetworkService {
   async initialize(): Promise<void> {
     this.pa.setAvailableAdapters(this.config.networks);
     try {
-      this.customNetworks = JSON.parse(localStorage['customNetworks']);
-    } catch (e) {}
+      this.customNetworks = JSON.parse(localStorage['customNetworks'] as string) as NetworkConfig;
+    } catch (e) {
+      // No custom networks set.
+    }
     this.pa.setAvailableAdapters(this.customNetworks, true);
 
-    // When there are no persistent settings set, look for default active chains in the config.
-    await Promise.allSettled(
-      Object.entries(this.pa.networks)
+    let activatedNetworks: string[] = [];
+    try {
+      const names = Object.keys(this.pa.networks);
+      activatedNetworks = JSON.parse(localStorage['userActivatedNetworks'] as string) as string[];
+      if (!Array.isArray(activatedNetworks)) {
+        throw 'userActivatedNetworks is not an array.'
+      }
+
+      // Check if custom network still exists, if not ignore it.
+      activatedNetworks = activatedNetworks.filter((n) => names.includes(n));
+
+    } catch (e) {
+      // Do nothing.
+    }
+
+    // When there are no persistent settings or there is no active network, look for default active chains in the config.
+    if (activatedNetworks.length === 0) {
+      activatedNetworks = Object.entries(this.pa.networks)
         .filter(([_, network]) => network.config.defaultActive)
-        .map(([n, _]) => this.enableNetwork(n))
-    );
+        .map(([n, _]) => n)
+    }
+
+    await Promise.allSettled(activatedNetworks.map((n) => this.enableNetwork(n)));
   }
 
   async enableNetwork(network: string): Promise<Networks> {
@@ -90,5 +109,9 @@ export class NetworkService {
     this.activeNetworks.value.splice(0, 0, network);
     this.activeNetworks.next(this.activeNetworks.value);
     return network;
+  }
+
+  storeActivateNetworks(): void {
+    localStorage['userActivatedNetworks'] = JSON.stringify(this.activeNetworks.value.map((n) => n.substrateRpc.chain));
   }
 }

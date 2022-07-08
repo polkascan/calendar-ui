@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import { Polkadapt, PolkadaptRunConfig } from '@polkadapt/core';
 import * as substrate from '@polkadapt/substrate-rpc';
-import { AppConfig, RelayChainConfig, NetworkConfig, ParachainConfig } from '../app-config';
+import { NetworkConfig, ParachainConfig, RelayChainConfig } from '../app-config';
 import { BehaviorSubject, Subject, Subscription, throttleTime } from 'rxjs';
 
 export type AugmentedApi = substrate.Api;
