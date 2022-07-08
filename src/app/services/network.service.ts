@@ -111,7 +111,7 @@ export class NetworkService {
     return network;
   }
 
-  storeActivateNetworks(): void {
+  storeActiveNetworks(): void {
     localStorage['userActivatedNetworks'] = JSON.stringify(this.activeNetworks.value.map((n) => n.substrateRpc.chain));
   }
 }

@@ -71,10 +71,10 @@ export class NetworkManager implements OnInit, OnDestroy {
         const networkName: string = network.substrateRpc.chain;
         if (active) {
           void this.ns.enableNetwork(networkName);
-          this.ns.storeActivateNetworks();
+          this.ns.storeActiveNetworks();
         } else {
           this.ns.disableNetwork(networkName);
-          this.ns.storeActivateNetworks();
+          this.ns.storeActiveNetworks();
         }
       });
     }
@@ -85,10 +85,10 @@ export class NetworkManager implements OnInit, OnDestroy {
         const networkName: string = selectedNetwork.substrateRpc.chain;
         if (active) {
           void this.ns.enableNetwork(networkName);
-          this.ns.storeActivateNetworks();
+          this.ns.storeActiveNetworks();
         } else {
           this.ns.disableNetwork(networkName);
-          this.ns.storeActivateNetworks();
+          this.ns.storeActiveNetworks();
         }
       }
     });
@@ -124,10 +124,10 @@ export class NetworkManager implements OnInit, OnDestroy {
       const networkName: string = network.substrateRpc.chain;
       if (active) {
         void this.ns.enableNetwork(networkName);
-        this.ns.storeActivateNetworks();
+        this.ns.storeActiveNetworks();
       } else {
         this.ns.disableNetwork(networkName);
-        this.ns.storeActivateNetworks();
+        this.ns.storeActiveNetworks();
       }
     });
     this.selectNetwork(network);
@@ -148,7 +148,7 @@ export class NetworkManager implements OnInit, OnDestroy {
     if (index > -1) {
       this.ns.activeNetworks.value.splice(index, 1);
       this.ns.activeNetworks.next(this.ns.activeNetworks.value);
-      this.ns.storeActivateNetworks();
+      this.ns.storeActiveNetworks();
     }
   }
 }
