@@ -52,10 +52,10 @@ export class PolkadotJsScheduledService {
   chainConstsPerChain: Map<string, ChainConsts> = new Map();
   calendarItemsPerChain: CalenderItemsPerChain = new Map();
   dataChanged = new Subject<CalenderItemsPerChain>();
+  loading: {[network: string]: BehaviorSubject<boolean>} = {};
 
   reloadAtBlockHeight: Map<string, number> = new Map();
 
-  private loading: Map<string, BehaviorSubject<boolean>> = new Map();
   private unsubscribeFns: Map<string, () => void> = new Map();
 
   constructor(private pa: PolkadaptService) {
@@ -73,13 +73,13 @@ export class PolkadotJsScheduledService {
     );
     this.newHeads.set(network, bs);
     this.unsubscribeFns.set(network, unsubFn);
-    this.loading.set(network, new BehaviorSubject<boolean>(false));
+    this.loading[network] = new BehaviorSubject<boolean>(false);
 
     await this.prefetchChainConsts(network);
 
     const fetchData = async (blockNumber: number): Promise<void> => {
-      const loading = this.loading.get(network) as BehaviorSubject<boolean>;
-      if (loading && loading.getValue()) {
+      const loading = this.loading[network];
+      if (loading && loading.value === true) {
         return;
       }
 
@@ -106,9 +106,10 @@ export class PolkadotJsScheduledService {
           this.fetchParachainLease(network, blockNumber)
         ]);
 
-        loading.next(false);
         this.dataChanged.next(this.calendarItemsPerChain);
       }
+
+      loading.next(false);
     }
 
     bs.pipe(

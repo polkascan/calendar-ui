@@ -30,10 +30,10 @@ import { MatCalendar, MatCalendarCellClassFunction } from '@angular/material/dat
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { getLocalDateString, getTodayDate } from '../services/helpers';
 import { CalendarService } from '../services/calendar.service';
-import { AppConfig } from '../app-config';
 import { NetworkManager } from '../components/network-manager/network-manager.component';
 import { MatDialog } from '@angular/material/dialog';
 import { NetworkService } from '../services/network.service';
+import { PolkadotJsScheduledService } from '../services/polkadot-js-scheduled.service';
 
 const viewNames = ['month', 'week', 'day'] as const;
 type ViewName = typeof viewNames[number];
@@ -79,9 +79,9 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private cal: CalendarService,
-    private config: AppConfig,
     public dialog: MatDialog,
-    public ns: NetworkService
+    public ns: NetworkService,
+    public pjss: PolkadotJsScheduledService
   ) {
   }
 

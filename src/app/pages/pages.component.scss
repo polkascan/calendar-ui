@@ -118,3 +118,19 @@
   margin-right: 5px;
   color: var(--ps-pages-legend-item-color);
 }
+
+.pages-legend-item--loading:before {
+  animation: pages-legend-item-loading-animation 700ms infinite linear;
+}
+
+@keyframes pages-legend-item-loading-animation {
+  from {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 0.2;
+  }
+}
