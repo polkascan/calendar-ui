@@ -2,30 +2,37 @@
 <mat-dialog-content>
   <div class="network-manager">
     <div class="network-list">
-      <button type="button" (click)="addCustomNetwork()">Add custom network</button>
-      <div *ngFor="let network of networks | async" (click)="selectNetwork(network)" class="network-list-item">
-        <ng-container *ngIf="network.isCustom">
+      <button mat-button (click)="addCustomNetwork()">
+        <mat-icon aria-hidden="false" aria-label="Add custom network">add</mat-icon>
+        Add custom network
+      </button>
+      <ng-container *ngFor="let network of networks | async">
+        <div *ngIf="network.isCustom" (click)="selectNetwork(network)" class="network-list-item"
+             [class.network-list-item--selected]="network == (selectedNetwork|async)">
           <mat-checkbox *ngIf="networkActiveFormControls.get(network) as control"
-                        [formControl]="control"></mat-checkbox>
-          {{network.config.name}}
+                        [formControl]="control" class="network-list-item-checkbox"
+                        (click)="$event.stopPropagation()"></mat-checkbox>
+          <span class="network-list-item-label">{{network.config.name}}</span>
           <button mat-button (click)="deleteCustomNetwork(network)">
-            <mat-icon aria-hidden="false" aria-label="Example home icon">delete</mat-icon>
+            <mat-icon aria-hidden="false" aria-label="Delete custom network">delete</mat-icon>
           </button>
           <button mat-button (click)="selectNetwork(network)">
-            <mat-icon aria-hidden="false" aria-label="Example home icon">edit</mat-icon>
+            <mat-icon aria-hidden="false" aria-label="Edit custom network">edit</mat-icon>
           </button>
-        </ng-container>
-      </div>
-      <div *ngFor="let network of networks | async" (click)="selectNetwork(network)" class="network-list-item">
-        <ng-container *ngIf="!network.isCustom">
+        </div>
+      </ng-container>
+      <ng-container *ngFor="let network of networks | async">
+        <div *ngIf="!network.isCustom" (click)="selectNetwork(network)"
+             class="network-list-item" [class.network-list-item--selected]="network == (selectedNetwork|async)">
           <mat-checkbox *ngIf="networkActiveFormControls.get(network) as control"
-                        [formControl]="control"></mat-checkbox>
-          {{network.config.name}}
+                        [formControl]="control" class="network-list-item-checkbox"
+                        (click)="$event.stopPropagation()"></mat-checkbox>
+          <span class="network-list-item-label">{{network.config.name}}</span>
           <button mat-button>
-            <mat-icon aria-hidden="false" aria-label="Example home icon">edit</mat-icon>
+            <mat-icon aria-hidden="false" aria-label="Edit network">edit</mat-icon>
           </button>
-        </ng-container>
-      </div>
+        </div>
+      </ng-container>
     </div>
     <div class="network-properties" *ngIf="selectedNetwork | async as selectedNetwork">
       <div class="network-properties-chain">
@@ -58,29 +65,40 @@
             <mat-checkbox formControlName="active">Show this network in the calendar</mat-checkbox>
           </div>
           <div class="network-properties-provider">
-            <mat-form-field appearance="fill">
-              <mat-label>Provider URL</mat-label>
-              <input type="text"
-                     placeholder="Enter URL"
-                     aria-label="URL"
-                     matInput
-                     formControlName="url"
-                     [matAutocomplete]="urlOptionsAuto">
-              <mat-autocomplete #urlOptionsAuto="matAutocomplete" (optionSelected)="connectSelectedNetwork()">
-                <mat-option *ngFor="let option of selectedNetwork.urls|async" [value]="option">
-                  {{option}}
-                </mat-option>
-              </mat-autocomplete>
-              <span class="mat-select-arrow" style="position: absolute; right: 0; top: 10px;"></span>
-            </mat-form-field>
+            <ng-container [ngSwitch]="selectedNetwork.isCustom">
+              <mat-form-field *ngSwitchCase="true" appearance="fill">
+                <mat-label>Custom Provider URL</mat-label>
+                <input type="text"
+                       placeholder="Enter URL"
+                       aria-label="URL"
+                       matInput
+                       formControlName="url">
+              </mat-form-field>
+
+              <mat-form-field *ngSwitchDefault appearance="fill">
+                <mat-label>Provider URL</mat-label>
+                <input type="text"
+                       placeholder="Enter URL"
+                       aria-label="URL"
+                       matInput
+                       formControlName="url"
+                       [matAutocomplete]="urlOptionsAuto">
+                <mat-autocomplete #urlOptionsAuto="matAutocomplete" (optionSelected)="connectSelectedNetwork()">
+                  <mat-option *ngFor="let option of selectedNetwork.urls|async" [value]="option">
+                    {{option}}
+                  </mat-option>
+                </mat-autocomplete>
+                <span class="mat-select-arrow" style="position: absolute; right: 0; top: 10px;"></span>
+              </mat-form-field>
+            </ng-container>
           </div>
           <div>
+            <button mat-stroked-button (click)="connectSelectedNetwork()">Connect</button>
             <ng-container *ngIf="selectedNetwork.isCustom">
               <button mat-button (click)="deleteCustomNetwork(selectedNetwork)">
-                <mat-icon aria-hidden="false" aria-label="Example home icon">delete</mat-icon>
+                <mat-icon aria-hidden="false" aria-label="Delete custom network">delete</mat-icon>
               </button>
             </ng-container>
-            <button mat-stroked-button (click)="connectSelectedNetwork()">Connect</button>
           </div>
 
         </form>

@@ -27,6 +27,7 @@ export type AugmentedApi = substrate.Api;
 type AdapterName = 'substrateRpc';
 
 export type Network = {
+  name: string;
   substrateRpc: substrate.Adapter;
   url: BehaviorSubject<string>;
   urls: BehaviorSubject<string[]>;
@@ -92,6 +93,7 @@ export class PolkadaptService {
 
   setAvailableAdapter(network: string, config: RelayChainConfig | ParachainConfig, isCustom=false): void {
     this.networks[network] = {
+      name: network,
       substrateRpc: new substrate.Adapter({
         chain: network
       }),
@@ -114,6 +116,17 @@ export class PolkadaptService {
         this.setAvailableAdapters(config.parachains as { [network: string]: ParachainConfig })
       }
     });
+  }
+
+  deleteAvailableAdapter(network: string) {
+    this.deactivateRPCAdapter(network);
+    delete this.badAdapterUrls[network];
+    const n = this.networks[network];
+    n.url.complete();
+    n.urls.complete();
+    n.registered.complete();
+    n.connected.complete();
+    delete this.networks[network];
   }
 
   async activateRPCAdapter(network: string): Promise<Networks> {

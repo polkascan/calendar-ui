@@ -74,6 +74,7 @@ export class NetworkService {
       (a, b) => (a.config.name > b.config.name) ? 1 : (a.config.name < b.config.name) ? -1 : 0
     )
     this.activeNetworks.next(this.activeNetworks.value);
+    this.storeActiveNetworks();
     this.connecting.next(this.connecting.value + 1);
     const result = await this.pa.activateRPCAdapter(network);
     void this.pjss.initializeChain(network);
@@ -86,32 +87,48 @@ export class NetworkService {
     if (index > -1) {
       this.activeNetworks.value.splice(index, 1);
       this.activeNetworks.next(this.activeNetworks.value);
+      this.storeActiveNetworks();
     }
     this.pjss.removeChain(network);
     this.pa.deactivateRPCAdapter(network);
   }
 
-  setCustomNetwork(key: string, name: string, substrateUrl: string): Network {
+  setCustomNetwork(name: string, label: string, substrateUrl?: string): Network {
     if (!this.customNetworks) {
       this.customNetworks = {};
     }
-    const custom: RelayChainConfig = {
-      name,
-      substrateRpcUrls: {'Custom': substrateUrl}
+    const customConfig: RelayChainConfig = {
+      name: label,
+      substrateRpcUrls: this.customNetworks[name]?.substrateRpcUrls || {'Custom': substrateUrl}
     };
-    if (!this.customNetworks[key]) {
+    if (!this.customNetworks[name]) {
       // New one.
-      this.pa.setAvailableAdapter(key, custom);
+      this.pa.setAvailableAdapter(name, customConfig, true);
+      this.activeNetworks.value.splice(0, 0, this.pa.networks[name]);
+      this.storeActiveNetworks();
+    } else {
+      this.pa.networks[name].config = customConfig;
     }
-    this.customNetworks[key] = custom;
-    localStorage['customNetworks'] = JSON.stringify(this.customNetworks);
-    const network: Network = this.pa.networks[key];
-    this.activeNetworks.value.splice(0, 0, network);
     this.activeNetworks.next(this.activeNetworks.value);
-    return network;
+    this.customNetworks[name] = customConfig;
+    localStorage['customNetworks'] = JSON.stringify(this.customNetworks);
+    return this.pa.networks[name];
+  }
+
+  deleteCustomNetwork(name: string) {
+    delete this.customNetworks[name];
+    localStorage['customNetworks'] = JSON.stringify(this.customNetworks);
+    const network: Network = this.pa.networks[name];
+    const index = this.activeNetworks.value.indexOf(network);
+    if (index > -1) {
+      this.activeNetworks.value.splice(index, 1);
+      this.activeNetworks.next(this.activeNetworks.value);
+      this.storeActiveNetworks();
+    }
+    this.pa.deleteAvailableAdapter(name);
   }
 
   storeActiveNetworks(): void {
-    localStorage['userActivatedNetworks'] = JSON.stringify(this.activeNetworks.value.map((n) => n.substrateRpc.chain));
+    localStorage['userActivatedNetworks'] = JSON.stringify(this.activeNetworks.value.map((n) => n.name));
   }
 }

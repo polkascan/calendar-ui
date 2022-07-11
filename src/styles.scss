@@ -28,30 +28,31 @@
   --ps-text-error-color: #8b0000;
 }
 
-
-button, html, input, select, textarea {
-  font-family: "Lexend", sans-serif;
-  font-weight: 400;
-  color: #350659;
-}
-
-body, html {
-  font-size: 16px;
-  line-height: 1.5;
-  padding: 0;
+html, body {
   margin: 0;
+  padding: 0;
   height: 100%;
+  font-family: "Lexend", sans-serif;
+  line-height: 1.5;
 }
 
 a {
   color: inherit;
 }
 
-.break-word {
-  word-break: break-word;
+.network-list-item--selected .mat-checkbox-frame {
+  border-color: #FFF;
 }
 
-.mono {
-  font-family: Consolas, monaco, "Ubuntu Mono", "Liberation Mono", "Courier New", Courier, monospace;
-  opacity: 66%;
+@media (max-width: 640px) {
+  html {
+    .mat-dialog-container {
+      padding: 10px;
+    }
+
+    .mat-dialog-content {
+      margin: 0;
+      padding: 0;
+    }
+  }
 }

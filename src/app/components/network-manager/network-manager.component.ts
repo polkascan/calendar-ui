@@ -68,13 +68,10 @@ export class NetworkManager implements OnInit, OnDestroy {
 
     for (const [network, control] of this.networkActiveFormControls.entries()) {
       control.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
-        const networkName: string = network.substrateRpc.chain;
         if (active) {
-          void this.ns.enableNetwork(networkName);
-          this.ns.storeActiveNetworks();
+          void this.ns.enableNetwork(network.name);
         } else {
-          this.ns.disableNetwork(networkName);
-          this.ns.storeActiveNetworks();
+          this.ns.disableNetwork(network.name);
         }
       });
     }
@@ -82,22 +79,18 @@ export class NetworkManager implements OnInit, OnDestroy {
     this.networkForm.controls.active.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
       const selectedNetwork: Network | null = this.selectedNetwork.value;
       if (selectedNetwork) {
-        const networkName: string = selectedNetwork.substrateRpc.chain;
         if (active) {
-          void this.ns.enableNetwork(networkName);
-          this.ns.storeActiveNetworks();
+          void this.ns.enableNetwork(selectedNetwork.name);
         } else {
-          this.ns.disableNetwork(networkName);
-          this.ns.storeActiveNetworks();
+          this.ns.disableNetwork(selectedNetwork.name);
         }
       }
     });
     this.networkForm.controls.name.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(name => {
-      if (this.selectedNetwork.value!.isCustom) {
-        this.selectedNetwork.value!.config.name = name || '';
-        this.networks.next(this.networks.value);
-        this.ns.activeNetworks.next(this.ns.activeNetworks.value);
-      }
+      const network: Network = this.selectedNetwork.value!;
+      this.ns.setCustomNetwork(network.name, name || '');
+      // Nothing actually changes, but we need to trigger the template.
+      this.networks.next(this.networks.value);
     });
   }
 
@@ -111,7 +104,11 @@ export class NetworkManager implements OnInit, OnDestroy {
   }
 
   connectSelectedNetwork(): void {
-    this.selectedNetwork.value;
+    const network: Network | null = this.selectedNetwork.value;
+    const url: string | null = this.networkForm.controls.url.value;
+    if (network && url) {
+      this.pa.setSubstrateRpcUrl(network.name, url).then();
+    }
   }
 
   addCustomNetwork(): void {
@@ -121,13 +118,10 @@ export class NetworkManager implements OnInit, OnDestroy {
     const control = new FormControl<boolean|null>(true);
     this.networkActiveFormControls.set(network, control);
     control.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
-      const networkName: string = network.substrateRpc.chain;
       if (active) {
-        void this.ns.enableNetwork(networkName);
-        this.ns.storeActiveNetworks();
+        void this.ns.enableNetwork(network.name);
       } else {
-        this.ns.disableNetwork(networkName);
-        this.ns.storeActiveNetworks();
+        this.ns.disableNetwork(network.name);
       }
     });
     this.selectNetwork(network);
@@ -144,11 +138,6 @@ export class NetworkManager implements OnInit, OnDestroy {
       this.networks.value.splice(index, 1);
       this.networks.next(this.networks.value);
     }
-    index = this.ns.activeNetworks.value.indexOf(network);
-    if (index > -1) {
-      this.ns.activeNetworks.value.splice(index, 1);
-      this.ns.activeNetworks.next(this.ns.activeNetworks.value);
-      this.ns.storeActiveNetworks();
-    }
+    this.ns.deleteCustomNetwork(network.name);
   }
 }
