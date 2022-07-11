@@ -165,4 +165,8 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.destroyer.next();
     this.destroyer.complete();
   }
+
+  trackByIndex(i: number): number {
+    return i;
+  }
 }
