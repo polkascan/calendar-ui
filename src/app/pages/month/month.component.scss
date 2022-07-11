@@ -123,6 +123,9 @@
   margin: 5px;
   padding: 3px 6px;
   font-size: 11px;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .month-calendar-item-description {
@@ -132,21 +135,26 @@
 
 
 .month-calendar-item-block {
-  display: inline-block;
   margin-right: 5px;
   padding: 2px 5px;
   color: white;
   white-space: nowrap;
   font-weight: bold;
   background: var(--ps-month-calendar-item-background-color);
+  text-shadow: -0.5px -0.5px 0 rgba(0,0,0,0.2), 0.5px -0.5px 0 rgba(0,0,0,0.2), -0.5px 0.5px 0 rgba(0,0,0,0.2), 0.5px 0.5px 0 rgba(0,0,0,0.2);
 }
 
 .month-calendar-item-time {
-  display: inline-block;
   margin-right: 5px;
   padding: 2px 5px;
   border-radius: 6px;
   background: lightgray;
   color: black;
   white-space: nowrap;
+}
+
+.month-calendar-item-logo img {
+  height: 19px;
+  width: 20px;
+  margin-right: 0.2em;
 }
