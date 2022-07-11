@@ -42,7 +42,7 @@
   grid-area: calendar;
   display: flex;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   max-height: 1400px;
   flex-direction: column;
 
@@ -54,15 +54,7 @@
   height: 2em;
   align-items: stretch;
   text-align: center;
-}
-
-.day-calendar-rows {
-  position: absolute;
-  pointer-events: none;
-  top: 2em;
-  left: 0;
-  bottom: 0;
-  right: 0;
+  border-bottom: solid 1px lightgrey;
 }
 
 .day-calendar-row-lines {
@@ -74,16 +66,21 @@
 }
 
 .day-calendar-row-line {
-  flex: 1 1 0;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: -6em;
   border-bottom: solid 1px lightgrey;
   border-collapse: collapse;
-  position: relative;
 }
 
 .day-calendar-timezone {
   position: absolute;
   bottom: 100%;
-  margin-bottom: -0.65rem;
+  right: 0;
+  left: -6em;
+  margin-left: 0.5rem;
+  border-bottom: solid 1px lightgrey;
   background: white;
 }
 
@@ -95,19 +92,10 @@
   background: white;
 }
 
-.day-calendar-columns-line {
-  position: absolute;
-  top: 0;
-  left: 6em;
-  width: 0;
-  height: 100%;
-  border-right: solid 1px lightgrey;
-}
-
 .day-calendar-current-time-indicator {
   position: absolute;
-  left: 0;
-  width: 100%;
+  left: -3em;
+  width: 3em;
   height: 0;
   border-bottom: solid 1px orangered;
 }
@@ -117,54 +105,55 @@
   padding: 4px 6px;
   position: relative;
   margin-left: 6em;
+  border-left: solid 1px lightgrey;
 }
 
 .day-calendar-current-time {
   position: absolute;
   color: orangered;
-  top: -0.75rem;
+  top: -0.55rem;
   left: 0.5rem;
   background: white;
   min-width: 2.5em;
+  font-size: 0.8em;
 }
 
 .day-calendar-item {
-  position: absolute;
+  position: relative;
+  padding: 0.2em 0;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
 
-  &:nth-child(2) { margin-left: 250px; }
-  &:nth-child(3) { margin-left: 500px; }
-  &:nth-child(4) { margin-left: 750px; }
-  &:nth-child(5) { margin-left: 1000px; }
-  &:nth-child(6) { margin-left: 1250px; }
-  &:nth-child(7) { margin-left: 1500px; }
-  &:nth-child(8) { margin-left: 1750px; }
-  &:nth-child(9) { margin-left: 2000px; }
-  &:nth-child(10) { margin-left: 2250px; }
-
-  width: 250px;
-  background: white;
-
-  &:focus, &:hover {
-    z-index: 1;
-  }
+.day-calendar-row-empty-item {
+  height: 0.7em;
 }
 
 .day-calendar-item-block {
-  display: inline-block;
   margin-right: 5px;
   padding: 2px 5px;
   color: white;
+  text-shadow: -0.5px -0.5px 0 rgba(0,0,0,0.2), 0.5px -0.5px 0 rgba(0,0,0,0.2), -0.5px 0.5px 0 rgba(0,0,0,0.2), 0.5px 0.5px 0 rgba(0,0,0,0.2);
   white-space: nowrap;
   font-weight: bold;
   background: var(--ps-day-calendar-item-background-color);
 }
 
 .day-calendar-item-time {
-  display: inline-block;
   margin-right: 5px;
   padding: 2px 5px;
   border-radius: 6px;
   background: lightgray;
   color: black;
   white-space: nowrap;
+}
+
+.day-calendar-item-logo {
+}
+
+.day-calendar-item-logo img {
+  height: 1.8em;
+  width: 1.8em;
+  margin-right: 0.2em;
 }

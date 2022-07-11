@@ -21,6 +21,7 @@ import { CalenderItemsPerChain, PolkadotJsScheduledService } from './polkadot-js
 import { EventItem } from '../pages/types';
 import { BehaviorSubject, map, Observable, startWith, Subject, Subscription } from 'rxjs';
 import { getLocalDateString } from './helpers';
+import { PolkadaptService } from './polkadapt.service';
 
 @Injectable({providedIn: 'root'})
 export class CalendarService {
@@ -28,7 +29,9 @@ export class CalendarService {
   eventItemsSubscription: Subscription;
   private eventItems: { [date: string]: BehaviorSubject<EventItem[]> } = {};
 
-  constructor(private pjss: PolkadotJsScheduledService) {
+  constructor(private pjss: PolkadotJsScheduledService,
+              private ps: PolkadaptService) {
+
     this.eventItemsSubscription = this.pjss.dataChanged.pipe(
       startWith(this.pjss.calendarItemsPerChain),
     ).subscribe((calenderItemsPerChain) => {
@@ -63,8 +66,22 @@ export class CalendarService {
             block,
             type: ci.type,
             description: this.getPjsItemDescription(ci.type, ci.data),
-            data: ci.data
+            data: ci.data,
           }
+
+          try {
+            item.networkLogo = this.ps.networks[ci.network].config.logo;
+          } catch (e) {
+            // ignore.
+          }
+
+          try {
+            item.networkName = this.ps.networks[ci.network].config.name;
+          } catch (e) {
+            // ignore.
+          }
+
+
           byDate[dateKey].push(item);
         }
       });

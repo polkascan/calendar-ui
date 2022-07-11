@@ -25,6 +25,8 @@ export type EventItem = {
   block: number;
   description: string;
   data?: { [key: string]: any }
+  networkLogo?: string;
+  networkName?: string;
 };
 
 export type DateColumn = {

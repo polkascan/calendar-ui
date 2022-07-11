@@ -17,10 +17,10 @@
  */
 
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { distinctUntilChanged, map, Observable, Subject, takeUntil } from 'rxjs';
+import { distinctUntilChanged, interval, map, Observable, Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
-import { DateColumn } from '../types';
+import { getCurrentTime, getDateFromRoute, getHourProgressPercentage, getTodayDate } from '../../services/helpers';
+import { DateColumn, EventItem } from '../types';
 import { CalendarService } from '../../services/calendar.service';
 import { PolkadaptService } from '../../services/polkadapt.service';
 
@@ -106,7 +106,7 @@ export class DayComponent implements OnInit, OnDestroy {
     );
 
     this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
-    this.timeLinePerc = getDayProgressPercentage(this.currentTime);
+    this.timeLinePerc = getHourProgressPercentage(this.currentTime);
 
     for (const n of Object.keys(this.pa.networks)) {
       this.chainColors[n] =  this.pa.networks[n].config.color;
@@ -116,5 +116,13 @@ export class DayComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyer.next();
     this.destroyer.complete();
+  }
+
+  trackByHour(i: number, item: EventItem[]): number {
+    return i;
+  }
+
+  trackByHourItems(i: number, item: EventItem): number {
+    return i;
   }
 }
