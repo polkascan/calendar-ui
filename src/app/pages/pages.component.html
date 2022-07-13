@@ -50,7 +50,7 @@
         <ng-container *ngFor="let network of ns.activeNetworks | async">
           <div class="pages-legend-item"
                [style.--ps-pages-legend-item-color]="network.config.color"
-               [class.pages-legend-item--loading]="(pjss.loading[network.substrateRpc.chain] | async) === true">{{network.config.name}}</div>
+               [class.pages-legend-item--loading]="(network.initializing | async) || (network.loading | async)">{{network.config.name}}</div>
         </ng-container>
       </div>
     </div>

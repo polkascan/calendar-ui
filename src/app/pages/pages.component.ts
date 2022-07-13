@@ -80,8 +80,7 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
     private route: ActivatedRoute,
     private cal: CalendarService,
     public dialog: MatDialog,
-    public ns: NetworkService,
-    public pjss: PolkadotJsScheduledService
+    public ns: NetworkService
   ) {
   }
 

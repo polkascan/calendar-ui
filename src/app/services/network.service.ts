@@ -47,9 +47,6 @@ export class NetworkService {
     try {
       const names = Object.keys(this.pa.networks);
       activatedNetworks = JSON.parse(localStorage['userActivatedNetworks'] as string) as string[];
-      if (!Array.isArray(activatedNetworks)) {
-        throw 'userActivatedNetworks is not an array.'
-      }
 
       // Check if custom network still exists, if not ignore it.
       activatedNetworks = activatedNetworks.filter((n) => names.includes(n));
@@ -68,7 +65,8 @@ export class NetworkService {
     await Promise.allSettled(activatedNetworks.map((n) => this.enableNetwork(n)));
   }
 
-  async enableNetwork(network: string): Promise<Networks> {
+  async enableNetwork(network: string): Promise<void> {
+    this.pa.networks[network].initializing.next(true);
     this.activeNetworks.value.push(this.pa.networks[network]);
     this.activeNetworks.value.sort(
       (a, b) => (a.config.name > b.config.name) ? 1 : (a.config.name < b.config.name) ? -1 : 0
@@ -76,10 +74,10 @@ export class NetworkService {
     this.activeNetworks.next(this.activeNetworks.value);
     this.storeActiveNetworks();
     this.connecting.next(this.connecting.value + 1);
-    const result = await this.pa.activateRPCAdapter(network);
+    await this.pa.activateRPCAdapter(network);
     void this.pjss.initializeChain(network);
     this.connecting.next(this.connecting.value - 1);
-    return result;
+    this.pa.networks[network].initializing.next(false);
   }
 
   disableNetwork(network: string): void {

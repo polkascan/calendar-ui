@@ -18,7 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { PolkadaptService } from './polkadapt.service';
-import { BehaviorSubject, filter, map, Subject } from 'rxjs';
+import { BehaviorSubject, filter, map, Observable, Subject } from 'rxjs';
 import type { Option, u32 } from '@polkadot/types';
 import type { ITuple } from '@polkadot/types/types';
 import {
@@ -52,18 +52,12 @@ export class PolkadotJsScheduledService {
   chainConstsPerChain: Map<string, ChainConsts> = new Map();
   calendarItemsPerChain: CalenderItemsPerChain = new Map();
   dataChanged = new Subject<CalenderItemsPerChain>();
-  loading: {[network: string]: BehaviorSubject<boolean>} = {};
 
   reloadAtBlockHeight: Map<string, number> = new Map();
 
   private unsubscribeFns: Map<string, () => void> = new Map();
 
   constructor(private pa: PolkadaptService) {
-  }
-
-  async initialize(): Promise<void> {
-    const networks = Object.keys(this.pa.networks);
-    await Promise.allSettled(networks.map((n) => this.initializeChain(n)));
   }
 
   async initializeChain(network: string): Promise<void> {
@@ -73,13 +67,12 @@ export class PolkadotJsScheduledService {
     );
     this.newHeads.set(network, bs);
     this.unsubscribeFns.set(network, unsubFn);
-    this.loading[network] = new BehaviorSubject<boolean>(false);
 
     await this.prefetchChainConsts(network);
 
     const fetchData = async (blockNumber: number): Promise<void> => {
-      const loading = this.loading[network];
-      if (loading && loading.value === true) {
+      const loading = this.pa.networks[network].loading;
+      if (loading.value) {
         return;
       }
 
@@ -105,7 +98,6 @@ export class PolkadotJsScheduledService {
           this.fetchSocietyChallenge(network, blockNumber),
           this.fetchParachainLease(network, blockNumber)
         ]);
-
         this.dataChanged.next(this.calendarItemsPerChain);
       }
 
@@ -137,14 +129,8 @@ export class PolkadotJsScheduledService {
     fn ? fn() : null;
 
     this.calendarItemsPerChain.delete(network);
+    this.reloadAtBlockHeight.delete(network);
     this.dataChanged.next(this.calendarItemsPerChain);
-  }
-
-  destroy(): void {
-    this.newHeads.forEach((bs) => bs.complete());
-    this.newHeads.clear();
-    this.unsubscribeFns.forEach((fn) => fn());
-    this.unsubscribeFns.clear();
   }
 
   getNewHeads(network: string): BehaviorSubject<Header | null> | undefined {

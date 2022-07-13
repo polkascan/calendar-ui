@@ -33,6 +33,8 @@ export type Network = {
   urls: BehaviorSubject<string[]>;
   registered: BehaviorSubject<boolean>;
   connected: BehaviorSubject<boolean>;
+  initializing: BehaviorSubject<boolean>;
+  loading: BehaviorSubject<boolean>;
   errorHandler?: () => void;
   connectedHandler?: () => void;
   disconnectedHandler?: () => void;
@@ -101,12 +103,15 @@ export class PolkadaptService {
       urls: new BehaviorSubject<string[]>(Object.values(config.substrateRpcUrls)),
       registered: new BehaviorSubject<boolean>(false),
       connected: new BehaviorSubject<boolean>(false),
+      initializing: new BehaviorSubject<boolean>(true),
+      loading: new BehaviorSubject<boolean>(false),
       config,
       isCustom
     };
     this.badAdapterUrls[network] = {
       substrateRpc: []
     };
+    this.configureSubstrateRpcUrl(network);
   }
 
   setAvailableAdapters(config: NetworkConfig | { [network: string]: ParachainConfig }, isCustom=false): void {
@@ -129,13 +134,10 @@ export class PolkadaptService {
     delete this.networks[network];
   }
 
-  async activateRPCAdapter(network: string): Promise<Networks> {
+  async activateRPCAdapter(network: string): Promise<void> {
     this.configureSubstrateRpcUrl(network);
     const ana = this.networks[network];
     const sAdapter = ana.substrateRpc;
-
-    const response: Networks = {};
-    response[network] = ana;
 
     ana.errorHandler = () => {
       this.reconnectSubstrateRpc(network);
@@ -164,8 +166,6 @@ export class PolkadaptService {
 
     // Wait until PolkADAPT has initialized all adapters.
     await this.polkadapt.ready();
-
-    return response;
   }
 
   deactivateRPCAdapter(network: string): void {

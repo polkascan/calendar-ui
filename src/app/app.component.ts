@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PolkadotJsScheduledService } from './services/polkadot-js-scheduled.service';
 import { NetworkService } from './services/network.service';
 
@@ -25,18 +25,12 @@ import { NetworkService } from './services/network.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   constructor(
-    private ns: NetworkService,
-    private pjss: PolkadotJsScheduledService) {
+    private ns: NetworkService) {
   }
 
   async ngOnInit(): Promise<void> {
     await this.ns.initialize();
-    void this.pjss.initialize();
-  }
-
-  ngOnDestroy(): void {
-    this.pjss.destroy();
   }
 }
