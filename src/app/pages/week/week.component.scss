@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-$hours-width: 6em;
-
 .week-calendar-container {
   height: 100%;
   display: grid;
@@ -41,85 +39,56 @@ $hours-width: 6em;
 
 .week-calendar {
   grid-area: calendar;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  flex-direction: column;
-
+  display: grid;
+  grid-template-columns: 90px repeat(7, minmax(0, 1fr));
+  min-width: 100%;
+  min-height: 100%;
   --ps-week-calendar-item-background-color: lightgray;
 }
 
-.week-calendar-header-row {
-  display: flex;
-  height: 3em;
-  align-items: stretch;
-  flex: 0 0 3em;
-  text-align: center;
-
-  .week-calendar--fixed & {
-    margin-left: $hours-width;
-  }
-}
-
 .week-calendar-header-column {
-  flex: 1 1 0;
+  text-align: center;
+  border-collapse: collapse;
+  padding: 2px;
 }
 
-.week-calendar-row {
-  position: relative;
-  display: flex;
-  flex: none;
-  align-items: stretch;
-  flex: 1 1 0;
-  border-right: solid 1px lightgrey;
-}
-
-.week-calendar-fixed-hours {
-  display: none;
-  flex: 0 0 $hours-width;
-}
-
-.week-calendar--fixed .week-calendar-fixed-hours,
 .week-calendar-column {
-  display: flex;
-  flex-flow: column nowrap;
-}
-
-.week-calendar-hour {
-  flex: 1 1 2.8em;
-  border-bottom: solid 1px lightgrey;
-  padding: 4px 6px;
+  border: solid 1px lightgrey;
   position: relative;
+  min-height: 40px;
+  border-collapse: collapse;
 }
 
+.week-calendar-column--left {
+  padding-left: 6px;
+  border-left: none;
+}
+
+.week-calendar-timezone,
 .week-calendar-time {
-  font-size: 12px;
+  position: absolute;
+  top: -13px;
+  background: white;
 }
 
 .week-calendar-column {
-  flex: 1 1 0;
-  position: relative;
-  border-style: solid;
-  border-width: 0 0 0 1px;
-  border-color: lightgrey;
-
   .mat-flat-button {
     background-color: transparent;
   }
 }
 
-.week-calendar-column--selected {
-    box-shadow: inset 0px 1px 5px 0px #3f51b5;
-
-  //.week-calendar-header-column-button {
-  //  background: #3f51b5;
-  //  border-radius: 6px;
-  //  color: white;
-  //}
+.week-calendar-columns-selected {
+  pointer-events: none;
+  grid-row-start: 2;
+  grid-row-end: span 25;
+  box-shadow: inset 0px 1px 5px 0px #3f51b5;
+  z-index: 1;
 }
 
 .week-calendar-header-column--past {
-  opacity: 0.6;
+  button {
+    opacity: 0.6;
+  }
 }
 
 .week-calendar-header-column--today {
@@ -140,58 +109,58 @@ $hours-width: 6em;
 
 .week-calendar-current-time-indicator {
   position: absolute;
-  left: 0;
-  width: 100%;
+  right: 0;
+  min-width: 46px;
   height: 0;
   border-bottom: solid 1px orangered;
 }
 
 .week-calendar-current-time {
+  font-size: 12px;
   position: absolute;
   color: orangered;
-  top: -0.75rem;
-  left: 0.5rem;
+  top: -9px;
+  right: 9px;
   background: white;
-  min-width: 2.5em;
 }
 
 .week-calendar-item {
-  position: absolute;
-
-  &:nth-child(2) { margin-left: 25px; margin-top: 5px; }
-  &:nth-child(3) { margin-left: 50px; margin-top: 10px; }
-  &:nth-child(4) { margin-left: 75px; margin-top: 15px; }
-  &:nth-child(5) { margin-left: 100px; margin-top: 20px; }
-  &:nth-child(6) { margin-left: 125px; margin-top: 25px; }
-  &:nth-child(7) { margin-left: 150px; margin-top: 30px; }
-  &:nth-child(8) { margin-left: 175px; margin-top: 35px; }
-  &:nth-child(9) { margin-left: 200px; margin-top: 40px; }
-  &:nth-child(10) { margin-left: 225px; margin-top: 45px; }
-
-  .week-calendar-item-description,
-  .week-calendar-item-block {
-    display: none;
-  }
-
-  &:focus, &:hover {
-    z-index: 1;
-    width: 200px;
-    background: white;
-
-    .week-calendar-item-description,
-    .week-calendar-item-block {
-      display: inline;
-    }
-  }
+  position: relative;
+  margin: 5px;
+  padding: 3px 6px;
+  font-size: 11px;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
+.week-calendar-item-description {
+  font-size: 13px;
+  vertical-align: middle;
+  word-break: break-word;
+}
 
-.week-calendar-item-block,
+.week-calendar-item-block {
+  margin-right: 5px;
+  padding: 2px 5px;
+  color: white;
+  white-space: nowrap;
+  font-weight: bold;
+  background: var(--ps-week-calendar-item-background-color);
+  text-shadow: -0.5px -0.5px 0 rgba(0, 0, 0, 0.2), 0.5px -0.5px 0 rgba(0, 0, 0, 0.2), -0.5px 0.5px 0 rgba(0, 0, 0, 0.2), 0.5px 0.5px 0 rgba(0, 0, 0, 0.2);
+}
+
 .week-calendar-item-time {
-  display: inline-block;
   margin-right: 5px;
   padding: 2px 5px;
   border-radius: 6px;
-  background: var(--ps-week-calendar-item-background-color);
-  color: white;
+  background: lightgray;
+  color: black;
+  white-space: nowrap;
+}
+
+.week-calendar-item-logo img {
+  height: 20px;
+  width: 20px;
+  margin-right: 0.2em;
 }

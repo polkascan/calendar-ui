@@ -76,11 +76,9 @@
 
 .day-calendar-timezone {
   position: absolute;
-  bottom: 100%;
-  right: 0;
+  top: -13px;
   left: -6em;
   margin-left: 0.5rem;
-  border-bottom: solid 1px lightgrey;
   background: white;
 }
 
@@ -138,6 +136,10 @@
   white-space: nowrap;
   font-weight: bold;
   background: var(--ps-day-calendar-item-background-color);
+}
+
+.day-calendar-item-description {
+    word-break: break-word;
 }
 
 .day-calendar-item-time {

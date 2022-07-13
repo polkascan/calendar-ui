@@ -131,6 +131,7 @@
 .month-calendar-item-description {
   font-size: 13px;
   vertical-align: middle;
+  word-break: break-word;
 }
 
 
@@ -154,7 +155,7 @@
 }
 
 .month-calendar-item-logo img {
-  height: 19px;
+  height: 20px;
   width: 20px;
   margin-right: 0.2em;
 }

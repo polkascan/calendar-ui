@@ -17,7 +17,7 @@
  */
 
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
+import { getCurrentTime, getDateFromRoute, getHourProgressPercentage, getTodayDate } from '../../services/helpers';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { DateColumn } from '../types';
@@ -111,7 +111,7 @@ export class WeekComponent implements OnInit, OnDestroy {
     );
 
     this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
-    this.timeLinePerc = getDayProgressPercentage(this.currentTime);
+    this.timeLinePerc = getHourProgressPercentage(this.currentTime);
 
     for (const n of Object.keys(this.pa.networks)) {
       this.chainColors[n] =  this.pa.networks[n].config.color;
@@ -123,4 +123,7 @@ export class WeekComponent implements OnInit, OnDestroy {
     this.destroyer.complete();
   }
 
+  trackByIndex(i: number): number {
+    return i;
+  }
 }
