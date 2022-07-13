@@ -62,25 +62,30 @@ export class NetworkService {
         .map(([n, _]) => n)
     }
 
-    await Promise.allSettled(activatedNetworks.map((n) => this.enableNetwork(n)));
+    await this.enableNetworks(activatedNetworks);
   }
 
-  async enableNetwork(network: string): Promise<void> {
-    this.pa.networks[network].initializing.next(true);
-    this.activeNetworks.value.push(this.pa.networks[network]);
-    this.activeNetworks.value.sort(
-      (a, b) =>
-        (!a.isCustom && b.isCustom) ? 1 : (a.isCustom && !b.isCustom) ? -1 :
-          (a.config.name > b.config.name) ? 1 : (a.config.name < b.config.name) ? -1 :
-            0
-    );
+  async enableNetworks(networks: string[]): Promise<void> {
+    for (const network of networks) {
+      this.pa.networks[network].initializing.next(true);
+      this.activeNetworks.value.push(this.pa.networks[network]);
+    }
+    this.sortActiveNetworks();
     this.activeNetworks.next(this.activeNetworks.value);
     this.storeActiveNetworks();
-    this.connecting.next(this.connecting.value + 1);
-    await this.pa.activateRPCAdapter(network);
-    void this.pjss.initializeChain(network);
-    this.connecting.next(this.connecting.value - 1);
-    this.pa.networks[network].initializing.next(false);
+    await Promise.allSettled(networks.map(n => this.loadNetwork(n)));
+  }
+
+  async loadNetwork(network: string): Promise<void> {
+    if (Object.keys(this.pa.networks[network].config.substrateRpcUrls).length > 0) {
+      this.connecting.next(this.connecting.value + 1);
+      await this.pa.activateRPCAdapter(network);
+      void this.pjss.initializeChain(network);
+      this.connecting.next(this.connecting.value - 1);
+      this.pa.networks[network].initializing.next(false);
+    } else {
+      console.error(`Network '${this.pa.networks[network].config.name}' has no provider URL set.`);
+    }
   }
 
   disableNetwork(network: string): void {
@@ -98,24 +103,25 @@ export class NetworkService {
     if (!this.customNetworks) {
       this.customNetworks = {};
     }
+    let substrateRpcUrls = {};
+    if (substrateUrl) {
+      substrateRpcUrls = {'Custom': substrateUrl};
+    } else if (this.customNetworks[name]) {
+      substrateRpcUrls = this.customNetworks[name].substrateRpcUrls;
+    }
     const customConfig: RelayChainConfig = {
       name: label,
-      substrateRpcUrls: this.customNetworks[name]?.substrateRpcUrls || {'Custom': substrateUrl}
+      substrateRpcUrls
     };
     if (!this.customNetworks[name]) {
       // New one.
       this.pa.setAvailableAdapter(name, customConfig, true);
       this.activeNetworks.value.push(this.pa.networks[name]);
-      this.activeNetworks.value.sort(
-      (a, b) =>
-        (!a.isCustom && b.isCustom) ? 1 : (a.isCustom && !b.isCustom) ? -1 :
-          (a.config.name > b.config.name) ? 1 : (a.config.name < b.config.name) ? -1 :
-            0
-      );
       this.storeActiveNetworks();
     } else {
       this.pa.networks[name].config = customConfig;
     }
+    this.sortActiveNetworks();
     this.activeNetworks.next(this.activeNetworks.value);
     this.customNetworks[name] = customConfig;
     localStorage['customNetworks'] = JSON.stringify(this.customNetworks);
@@ -133,6 +139,15 @@ export class NetworkService {
       this.storeActiveNetworks();
     }
     this.pa.deleteAvailableAdapter(name);
+  }
+
+  sortActiveNetworks(): void {
+    this.activeNetworks.value.sort(
+      (a, b) =>
+        (!a.isCustom && b.isCustom) ? 1 : (a.isCustom && !b.isCustom) ? -1 :
+          (a.config.name > b.config.name) ? 1 : (a.config.name < b.config.name) ? -1 :
+            0
+    );
   }
 
   storeActiveNetworks(): void {

@@ -44,7 +44,7 @@
   height: 100%;
   flex-direction: column;
 
-  --ps-month-calendar-item-background-color: lightgray;
+  --ps-month-calendar-item-background-color: var(--ps-pages-legend-item-color);
 }
 
 .month-calendar-header-row {

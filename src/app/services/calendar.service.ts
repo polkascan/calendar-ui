@@ -29,8 +29,7 @@ export class CalendarService {
   eventItemsSubscription: Subscription;
   private eventItems: { [date: string]: BehaviorSubject<EventItem[]> } = {};
 
-  constructor(private pjss: PolkadotJsScheduledService,
-              private ps: PolkadaptService) {
+  constructor(private pjss: PolkadotJsScheduledService) {
 
     this.eventItemsSubscription = this.pjss.dataChanged.pipe(
       startWith(this.pjss.calendarItemsPerChain),
@@ -68,20 +67,6 @@ export class CalendarService {
             description: this.getPjsItemDescription(ci.type, ci.data),
             data: ci.data,
           }
-
-          try {
-            item.networkLogo = this.ps.networks[ci.network].config.logo;
-          } catch (e) {
-            // ignore.
-          }
-
-          try {
-            item.networkName = this.ps.networks[ci.network].config.name;
-          } catch (e) {
-            // ignore.
-          }
-
-
           byDate[dateKey].push(item);
         }
       });

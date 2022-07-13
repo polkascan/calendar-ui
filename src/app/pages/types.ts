@@ -17,16 +17,15 @@
  */
 
 import { Observable } from 'rxjs';
+import { Network } from '../services/polkadapt.service';
 
 export type EventItem = {
-  network: string;
+  network: Network;
   type: string;
   date: Date;
   block: number;
   description: string;
   data?: { [key: string]: any }
-  networkLogo?: string;
-  networkName?: string;
 };
 
 export type DateColumn = {
@@ -50,7 +49,7 @@ export type PjsCalendarItemDuration = {
 }
 
 export type PjsCalendarItem = PjsCalendarItemDuration & {
-  network: string;
+  network: Network;
   type: string;
   data: { [key: string]: any };
 }

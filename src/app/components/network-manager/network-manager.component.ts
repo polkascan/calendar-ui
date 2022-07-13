@@ -61,7 +61,7 @@ export class NetworkManager implements OnInit, OnDestroy {
           // emission, and the subscription couldn't continue monitoring outside changes to this network's url.
           takeUntil(this.selectedNetwork.pipe(skip(1), mergeWith(this.destroyer))),
         ).subscribe(url => {
-          this.networkForm.controls.url.reset(url, {emitEvent: false});
+          this.networkForm.controls.url.reset(url || '', {emitEvent: false});
         });
       }
     });
@@ -69,7 +69,7 @@ export class NetworkManager implements OnInit, OnDestroy {
     for (const [network, control] of this.networkActiveFormControls.entries()) {
       control.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
         if (active) {
-          void this.ns.enableNetwork(network.name);
+          void this.ns.enableNetworks([network.name]);
         } else {
           this.ns.disableNetwork(network.name);
         }
@@ -80,7 +80,7 @@ export class NetworkManager implements OnInit, OnDestroy {
       const selectedNetwork: Network | null = this.selectedNetwork.value;
       if (selectedNetwork) {
         if (active) {
-          void this.ns.enableNetwork(selectedNetwork.name);
+          void this.ns.enableNetworks([selectedNetwork.name]);
         } else {
           this.ns.disableNetwork(selectedNetwork.name);
         }
@@ -110,20 +110,21 @@ export class NetworkManager implements OnInit, OnDestroy {
       this.pa.setSubstrateRpcUrl(network.name, url).then();
       if (network.isCustom) {
         this.ns.disableNetwork(network.name);
-        this.ns.enableNetwork(network.name).then();
+        this.ns.setCustomNetwork(network.name, network.config.name, url);
+        this.ns.enableNetworks([network.name]).then();
       }
     }
   }
 
   addCustomNetwork(): void {
-    const network: Network = this.ns.setCustomNetwork(`custom${new Date().getTime()}`, 'My Custom Network', '');
+    const network: Network = this.ns.setCustomNetwork(`custom${new Date().getTime()}`, 'Custom Network');
     this.networks.value.splice(0, 0, network);
     this.networks.next(this.networks.value);
     const control = new FormControl<boolean|null>(true);
     this.networkActiveFormControls.set(network, control);
     control.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(active => {
       if (active) {
-        void this.ns.enableNetwork(network.name);
+        void this.ns.enableNetworks([network.name]);
       } else {
         this.ns.disableNetwork(network.name);
       }

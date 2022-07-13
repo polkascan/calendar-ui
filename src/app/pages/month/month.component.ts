@@ -156,7 +156,9 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
       const dateStr = `${date.getFullYear()}-${m}-${d}`;
       const dateEl: HTMLElement | null = this.host.nativeElement.querySelector(`.month-calendar-${dateStr}`);
       if (dateEl) {
-        dateEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+        setTimeout(() => {
+          dateEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+        }, 100);
       }
     });
   }
