@@ -69,8 +69,11 @@ export class NetworkService {
     this.pa.networks[network].initializing.next(true);
     this.activeNetworks.value.push(this.pa.networks[network]);
     this.activeNetworks.value.sort(
-      (a, b) => (a.config.name > b.config.name) ? 1 : (a.config.name < b.config.name) ? -1 : 0
-    )
+      (a, b) =>
+        (!a.isCustom && b.isCustom) ? 1 : (a.isCustom && !b.isCustom) ? -1 :
+          (a.config.name > b.config.name) ? 1 : (a.config.name < b.config.name) ? -1 :
+            0
+    );
     this.activeNetworks.next(this.activeNetworks.value);
     this.storeActiveNetworks();
     this.connecting.next(this.connecting.value + 1);
@@ -102,7 +105,13 @@ export class NetworkService {
     if (!this.customNetworks[name]) {
       // New one.
       this.pa.setAvailableAdapter(name, customConfig, true);
-      this.activeNetworks.value.splice(0, 0, this.pa.networks[name]);
+      this.activeNetworks.value.push(this.pa.networks[name]);
+      this.activeNetworks.value.sort(
+      (a, b) =>
+        (!a.isCustom && b.isCustom) ? 1 : (a.isCustom && !b.isCustom) ? -1 :
+          (a.config.name > b.config.name) ? 1 : (a.config.name < b.config.name) ? -1 :
+            0
+      );
       this.storeActiveNetworks();
     } else {
       this.pa.networks[name].config = customConfig;

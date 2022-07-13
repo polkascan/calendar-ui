@@ -108,6 +108,10 @@ export class NetworkManager implements OnInit, OnDestroy {
     const url: string | null = this.networkForm.controls.url.value;
     if (network && url) {
       this.pa.setSubstrateRpcUrl(network.name, url).then();
+      if (network.isCustom) {
+        this.ns.disableNetwork(network.name);
+        this.ns.enableNetwork(network.name).then();
+      }
     }
   }
 
