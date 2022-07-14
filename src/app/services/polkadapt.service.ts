@@ -114,7 +114,9 @@ export class PolkadaptService {
     this.badAdapterUrls[network] = {
       substrateRpc: []
     };
-    this.configureSubstrateRpcUrl(network);
+    if (Object.keys(config.substrateRpcUrls).length > 0) {
+      this.configureSubstrateRpcUrl(network);
+    }
   }
 
   setAvailableAdapters(config: NetworkConfig | { [network: string]: ParachainConfig }, isCustom = false): void {
