@@ -21,6 +21,7 @@ import { Polkadapt, PolkadaptRunConfig } from '@polkadapt/core';
 import * as substrate from '@polkadapt/substrate-rpc';
 import { NetworkConfig, ParachainConfig, RelayChainConfig } from '../app-config';
 import { BehaviorSubject, Subject, Subscription, throttleTime } from 'rxjs';
+import { ApiPromise } from '@polkadot/api';
 
 export type AugmentedApi = substrate.Api;
 
@@ -34,6 +35,7 @@ export type Network = {
   registered: BehaviorSubject<boolean>;
   connected: BehaviorSubject<boolean>;
   initializing: BehaviorSubject<boolean>;
+  failed: BehaviorSubject<boolean>
   loading: BehaviorSubject<boolean>;
   errorHandler?: () => void;
   connectedHandler?: () => void;
@@ -93,7 +95,7 @@ export class PolkadaptService {
       .subscribe(() => this.forceReconnect());
   }
 
-  setAvailableAdapter(network: string, config: RelayChainConfig | ParachainConfig, isCustom=false): void {
+  setAvailableAdapter(network: string, config: RelayChainConfig | ParachainConfig, isCustom = false): void {
     this.networks[network] = {
       name: network,
       substrateRpc: new substrate.Adapter({
@@ -104,6 +106,7 @@ export class PolkadaptService {
       registered: new BehaviorSubject<boolean>(false),
       connected: new BehaviorSubject<boolean>(false),
       initializing: new BehaviorSubject<boolean>(true),
+      failed: new BehaviorSubject<boolean>(false),
       loading: new BehaviorSubject<boolean>(false),
       config,
       isCustom
@@ -114,7 +117,7 @@ export class PolkadaptService {
     this.configureSubstrateRpcUrl(network);
   }
 
-  setAvailableAdapters(config: NetworkConfig | { [network: string]: ParachainConfig }, isCustom=false): void {
+  setAvailableAdapters(config: NetworkConfig | { [network: string]: ParachainConfig }, isCustom = false): void {
     Object.entries(config).forEach(([network, config]) => {
       this.setAvailableAdapter(network, config, isCustom);
       if (config.parachains) {
@@ -134,38 +137,54 @@ export class PolkadaptService {
     delete this.networks[network];
   }
 
-  async activateRPCAdapter(network: string): Promise<void> {
-    this.configureSubstrateRpcUrl(network);
-    const ana = this.networks[network];
-    const sAdapter = ana.substrateRpc;
+  activateRPCAdapter(network: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.configureSubstrateRpcUrl(network);
+      const ana = this.networks[network];
+      const sAdapter = ana.substrateRpc;
 
-    ana.errorHandler = () => {
-      this.reconnectSubstrateRpc(network);
-    };
-    sAdapter.on('error', ana.errorHandler);
+      ana.errorHandler = () => {
+        this.reconnectSubstrateRpc(network);
+      };
+      sAdapter.on('error', ana.errorHandler);
 
-    ana.connectedHandler = () => {
-      ana.connected.next(true);
-    };
-    sAdapter.on('connected', ana.connectedHandler);
+      ana.connectedHandler = () => {
+        ana.connected.next(true);
+      };
+      sAdapter.on('connected', ana.connectedHandler);
 
-    ana.disconnectedHandler = () => {
-      ana.connected.next(false);
-    };
-    sAdapter.on('disconnected', ana.disconnectedHandler);
+      ana.disconnectedHandler = () => {
+        ana.connected.next(false);
+      };
+      sAdapter.on('disconnected', ana.disconnectedHandler);
 
-    ana.urls.next(Object.values(ana.config.substrateRpcUrls));
+      ana.urls.next(Object.values(ana.config.substrateRpcUrls));
 
-    try {
-      this.polkadapt.register(sAdapter);
-      ana.registered.next(true);
-    } catch (e) {
-      ana.registered.next(false);
-      throw e;
-    }
+      try {
+        this.polkadapt.register(sAdapter);
+        ana.registered.next(true);
+      } catch (e) {
+        ana.registered.next(false);
+        throw e;
+      }
 
-    // Wait until PolkADAPT has initialized all adapters.
-    await this.polkadapt.ready();
+      const timeout = window.setTimeout((): void => {
+        reject(`[PolkadaptService] Setting up adapter for ${network} exceeded time limit.`);
+      }, 3000);
+
+      let apiPromise: ApiPromise | undefined;
+      sAdapter.promise.then((p: ApiPromise) => {
+        apiPromise = p;
+        if (!p) {
+          reject(`[PolkadaptService] Setting up adapter for ${network} failed. No ApiPromise was created.`);
+        } else {
+          clearTimeout(timeout);
+          resolve();
+        }
+      }, () => {
+        reject(`[PolkadaptService] Setting up adapter for ${network} failed.`);
+      });
+    });
   }
 
   deactivateRPCAdapter(network: string): void {

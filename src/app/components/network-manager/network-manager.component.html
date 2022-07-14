@@ -42,7 +42,12 @@
             <ng-container *ngSwitchCase="true">
               <ng-container [ngSwitch]="selectedNetwork.connected|async">
                 <span *ngSwitchCase="true">(connected)</span>
-                <span *ngSwitchCase="false">(connecting)</span>
+                <span *ngSwitchCase="false">
+                  <ng-container [ngSwitch]="selectedNetwork.failed|async">
+                    <span *ngSwitchCase="true">(failed)</span>
+                    <span *ngSwitchCase="false">(connecting)</span>
+                  </ng-container>
+                </span>
               </ng-container>
             </ng-container>
             <ng-container *ngSwitchCase="false">
@@ -93,7 +98,7 @@
             </ng-container>
           </div>
           <div>
-            <button mat-stroked-button (click)="connectSelectedNetwork()">Connect</button>
+            <button mat-stroked-button (click)="connectSelectedNetwork()" [disabled]="networkForm.invalid">Connect</button>
             <ng-container *ngIf="selectedNetwork.isCustom">
               <button mat-button (click)="deleteCustomNetwork(selectedNetwork)">
                 <mat-icon aria-hidden="false" aria-label="Delete custom network">delete</mat-icon>

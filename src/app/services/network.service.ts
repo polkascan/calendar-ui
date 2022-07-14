@@ -66,12 +66,16 @@ export class NetworkService {
   }
 
   async enableNetworks(networks: string[]): Promise<void> {
+    const activeNetworks = this.activeNetworks.value;
     for (const network of networks) {
       this.pa.networks[network].initializing.next(true);
-      this.activeNetworks.value.push(this.pa.networks[network]);
+      this.pa.networks[network].failed.next(false);
+      if (activeNetworks.indexOf(this.pa.networks[network])) {
+        activeNetworks.push(this.pa.networks[network]);
+      }
     }
     this.sortActiveNetworks();
-    this.activeNetworks.next(this.activeNetworks.value);
+    this.activeNetworks.next(activeNetworks);
     this.storeActiveNetworks();
     await Promise.allSettled(networks.map(n => this.loadNetwork(n)));
   }
@@ -79,8 +83,14 @@ export class NetworkService {
   async loadNetwork(network: string): Promise<void> {
     if (Object.keys(this.pa.networks[network].config.substrateRpcUrls).length > 0) {
       this.connecting.next(this.connecting.value + 1);
-      await this.pa.activateRPCAdapter(network);
-      void this.pjss.initializeChain(network);
+      console.log(network);
+      try {
+        await this.pa.activateRPCAdapter(network);
+        void this.pjss.initializeChain(network);
+      } catch (e) {
+        this.pa.networks[network].failed.next(true);
+        console.error([NetworkService], e);
+      }
       this.connecting.next(this.connecting.value - 1);
       this.pa.networks[network].initializing.next(false);
     } else {

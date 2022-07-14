@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatestWith, mergeWith, skip, Subject, takeUntil } from 'rxjs';
 import { Network, PolkadaptService } from '../../services/polkadapt.service';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NetworkService } from '../../services/network.service';
 
 
@@ -19,7 +19,7 @@ export class NetworkManager implements OnInit, OnDestroy {
   networkForm = new FormGroup({
     name: new FormControl<string|null>(null),
     active: new FormControl<boolean>(true),
-    url: new FormControl<string|null>(null),
+    url: new FormControl<string|null>(null, [Validators.required, Validators.pattern(/^wss?:\/\/\S+$/)]),
   });
 
   constructor(
@@ -104,14 +104,19 @@ export class NetworkManager implements OnInit, OnDestroy {
   }
 
   connectSelectedNetwork(): void {
-    const network: Network | null = this.selectedNetwork.value;
-    const url: string | null = this.networkForm.controls.url.value;
-    if (network && url) {
-      this.pa.setSubstrateRpcUrl(network.name, url).then();
-      if (network.isCustom) {
-        this.ns.disableNetwork(network.name);
-        this.ns.setCustomNetwork(network.name, network.config.name, url);
-        this.ns.enableNetworks([network.name]).then();
+    if (this.networkForm.valid) {
+      const network: Network | null = this.selectedNetwork.value;
+      const url: string | null = this.networkForm.controls.url.value;
+      if (network && url) {
+        void this.pa.setSubstrateRpcUrl(network.name, url).then();
+        if (network.isCustom) {
+          this.ns.disableNetwork(network.name);
+          this.ns.setCustomNetwork(network.name, network.config.name, url);
+          void this.ns.enableNetworks([network.name]).then();
+        } else if (this.pa.networks[network.name].failed.value) {
+          // Try to reconnect a failed network.
+          void this.ns.enableNetworks([network.name]).then();
+        }
       }
     }
   }
