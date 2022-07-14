@@ -201,7 +201,7 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  openChainManager(): void {
+  openNetworkManager(): void {
     this.dialog.open(NetworkManager, {maxWidth: '100vw'});
   }
 }
