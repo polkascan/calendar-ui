@@ -157,5 +157,14 @@
 .month-calendar-item-logo img {
   height: 20px;
   width: 20px;
-  margin-right: 0.2em;
+  margin-right: 5px;
+}
+
+.month-calendar-item-logo-custom {
+  display: inline-block;
+  height: 20px;
+  min-width: 20px;
+  margin-right: 5px;
+  border: solid 1px lightgray;
+  text-align: center;
 }

@@ -77,7 +77,7 @@
                   <span class="week-calendar-item-time">{{ item.date | date: 'HH:mm' }}</span>
                   <span class="week-calendar-item-logo">
                     <img *ngIf="item.network.config.logo" [src]="item.network.config.logo" alt="Logo">
-                    <ng-container *ngIf="!item.network.config.logo">{{ item.network.config.name.substring(0, 2) }}</ng-container>
+                    <span class="week-calendar-item-logo-custom" *ngIf="!item.network.config.logo">{{ item.network.config.name.substring(0, 2) }}</span>
                   </span>
                   <span class="week-calendar-item-block">{{ item.block }}</span>
                   <span class="week-calendar-item-description">{{ item.description }}</span>

@@ -154,5 +154,14 @@
 .day-calendar-item-logo img {
   height: 28px;
   width: 28px;
-  margin-right: 0.2em;
+  margin-right: 5px;
+}
+
+.day-calendar-item-logo-custom {
+  display: inline-block;
+  height: 28px;
+  min-width: 28px;
+  margin-right: 5px;
+  border: solid 1px lightgray;
+  text-align: center;
 }
