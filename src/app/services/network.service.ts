@@ -83,7 +83,6 @@ export class NetworkService {
   async loadNetwork(network: string): Promise<void> {
     if (Object.keys(this.pa.networks[network].config.substrateRpcUrls).length > 0) {
       this.connecting.next(this.connecting.value + 1);
-      console.log(network);
       try {
         await this.pa.activateRPCAdapter(network);
         void this.pjss.initializeChain(network);
