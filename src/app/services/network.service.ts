@@ -17,7 +17,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Network, Networks, PolkadaptService } from './polkadapt.service';
+import { Network, PolkadaptService } from './polkadapt.service';
 import { BehaviorSubject } from 'rxjs';
 import { PolkadotJsScheduledService } from './polkadot-js-scheduled.service';
 import { AppConfig, NetworkConfig, RelayChainConfig } from '../app-config';
@@ -70,7 +70,7 @@ export class NetworkService {
     for (const network of networks) {
       this.pa.networks[network].initializing.next(true);
       this.pa.networks[network].failed.next(false);
-      if (activeNetworks.indexOf(this.pa.networks[network])) {
+      if (activeNetworks.indexOf(this.pa.networks[network]) === -1) {
         activeNetworks.push(this.pa.networks[network]);
       }
     }
@@ -83,7 +83,6 @@ export class NetworkService {
   async loadNetwork(network: string): Promise<void> {
     if (Object.keys(this.pa.networks[network].config.substrateRpcUrls).length > 0) {
       this.connecting.next(this.connecting.value + 1);
-      console.log(network);
       try {
         await this.pa.activateRPCAdapter(network);
         void this.pjss.initializeChain(network);

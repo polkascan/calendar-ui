@@ -8,7 +8,8 @@
       </button>
       <ng-container *ngFor="let network of networks | async">
         <div *ngIf="network.isCustom" (click)="selectNetwork(network)" class="network-list-item"
-             [class.network-list-item--selected]="network == (selectedNetwork|async)">
+             [class.network-list-item--failed]="network.failed | async"
+             [class.network-list-item--selected]="network === (selectedNetwork|async)">
           <mat-checkbox *ngIf="networkActiveFormControls.get(network) as control"
                         [formControl]="control" class="network-list-item-checkbox"
                         (click)="$event.stopPropagation()"></mat-checkbox>
@@ -22,8 +23,9 @@
         </div>
       </ng-container>
       <ng-container *ngFor="let network of networks | async">
-        <div *ngIf="!network.isCustom" (click)="selectNetwork(network)"
-             class="network-list-item" [class.network-list-item--selected]="network == (selectedNetwork|async)">
+        <div *ngIf="!network.isCustom" (click)="selectNetwork(network)" class="network-list-item"
+             [class.network-list-item--failed]="network.failed | async"
+             [class.network-list-item--selected]="network === (selectedNetwork|async)">
           <mat-checkbox *ngIf="networkActiveFormControls.get(network) as control"
                         [formControl]="control" class="network-list-item-checkbox"
                         (click)="$event.stopPropagation()"></mat-checkbox>
@@ -44,7 +46,7 @@
                 <span *ngSwitchCase="true">(connected)</span>
                 <span *ngSwitchCase="false">
                   <ng-container [ngSwitch]="selectedNetwork.failed|async">
-                    <span *ngSwitchCase="true">(failed)</span>
+                    <span *ngSwitchCase="true" class="network-properties-chain--failed">(failed)</span>
                     <span *ngSwitchCase="false">(connecting)</span>
                   </ng-container>
                 </span>
@@ -98,7 +100,8 @@
             </ng-container>
           </div>
           <div>
-            <button mat-stroked-button (click)="connectSelectedNetwork()" [disabled]="networkForm.invalid">Connect</button>
+            <button mat-stroked-button (click)="connectSelectedNetwork()" [disabled]="networkForm.invalid">Connect
+            </button>
             <ng-container *ngIf="selectedNetwork.isCustom">
               <button mat-button (click)="deleteCustomNetwork(selectedNetwork)">
                 <mat-icon aria-hidden="false" aria-label="Delete custom network">delete</mat-icon>

@@ -123,6 +123,11 @@
   animation: pages-legend-item-loading-animation 700ms infinite linear;
 }
 
+.pages-legend-item--failed {
+  color: var(--ps-text-error-color);
+  text-decoration: line-through;
+}
+
 @keyframes pages-legend-item-loading-animation {
   from {
     opacity: 0.2;

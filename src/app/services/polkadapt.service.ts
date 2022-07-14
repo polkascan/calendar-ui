@@ -134,6 +134,8 @@ export class PolkadaptService {
     n.urls.complete();
     n.registered.complete();
     n.connected.complete();
+    n.failed.complete();
+    n.loading.complete();
     delete this.networks[network];
   }
 
@@ -170,7 +172,7 @@ export class PolkadaptService {
 
       const timeout = window.setTimeout((): void => {
         reject(`[PolkadaptService] Setting up adapter for ${network} exceeded time limit.`);
-      }, 3000);
+      }, 10000);
 
       let apiPromise: ApiPromise | undefined;
       sAdapter.promise.then((p: ApiPromise) => {

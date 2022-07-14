@@ -64,3 +64,16 @@
 .network-properties-provider mat-form-field {
   width: 400px;
 }
+
+.network-list-item--failed .network-list-item-label {
+  text-decoration: line-through;
+  color: var(--ps-text-error-color);
+}
+
+.network-properties-chain--failed {
+  color: var(--ps-text-error-color);
+}
+
+.network-list-item--selected .network-list-item--failed .network-list-item-label {
+    color: #fff;
+}
