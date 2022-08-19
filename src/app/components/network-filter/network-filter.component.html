@@ -43,12 +43,12 @@
     </div>
     <div class="network-filter-item-name">{{network.config.name}}</div>
     <div class="network-filter-item-button">
-      <button mat-icon-button>
+      <button mat-icon-button *ngIf="{value: hiddenNetworks.indexOf(network.name) !== -1 } as hidden" (click)="toggleNetworkVisibility(network.name)">
         <mat-icon aria-hidden="true" class="network-filter-visibility-icon"
-                  [class.network-filter-visibility-icon--on]="true"
-                  [class.network-filter-visibility-icon--off]="false"
-                  [style]="'color: ' + network.config.color">
-          <span class="material-symbols-outlined">{{ true ? 'visibility' : 'visibility_off' }}</span>
+                  [class.network-filter-visibility-icon--on]="!hidden.value"
+                  [class.network-filter-visibility-icon--off]="hidden.value"
+                  [style]="!hidden.value ? 'color: ' + network.config.color : ''">
+          <span class="material-symbols-outlined">{{ !hidden.value ? 'visibility' : 'visibility_off' }}</span>
         </mat-icon>
       </button>
     </div>
