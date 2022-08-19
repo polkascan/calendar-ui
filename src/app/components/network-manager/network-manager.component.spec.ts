@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NetworkManager } from './network-manager.component';
+import { NetworkManagerComponent } from './network-manager.component';
 
 describe('ChainManagerComponent', () => {
-  let component: NetworkManager;
-  let fixture: ComponentFixture<NetworkManager>;
+  let component: NetworkManagerComponent;
+  let fixture: ComponentFixture<NetworkManagerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NetworkManager ]
+      declarations: [ NetworkManagerComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(NetworkManager);
+    fixture = TestBed.createComponent(NetworkManagerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

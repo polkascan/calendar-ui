@@ -27,7 +27,7 @@
   grid-template-rows: min-content auto;
   grid-template-areas:
     "header header"
-    "datepicker calendars";
+    "sidebar calendars";
 }
 
 .pages-header {
@@ -73,19 +73,21 @@
   fill: white;
 }
 
-.pages-date-picker {
-  grid-area: datepicker;
+.pages-sidebar {
+  grid-area: sidebar;
   margin-left: 16px;
   margin-right: 16px;
 }
 
+.pages-date-picker {
+}
+
 .pages-calendars {
   grid-area: calendars;
+  position: relative;
 }
 
 .pages-date-picker-tools {
-  position: sticky;
-  top: 16px;
 }
 
 .calendar-picker-date-past {
@@ -109,37 +111,3 @@
   }
 }
 
-.pages-legend {
-  margin: 16px 0;
-}
-
-.pages-legend-item:before {
-  content: '\25AC';
-  margin-right: 5px;
-  color: var(--ps-pages-legend-item-color);
-}
-
-.pages-legend-item--loading:before {
-  animation: pages-legend-item-loading-animation 700ms infinite linear;
-}
-
-.pages-legend-item--failed {
-  color: var(--ps-text-error-color);
-  text-decoration: line-through;
-}
-
-@keyframes pages-legend-item-loading-animation {
-  from {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.8;
-  }
-  to {
-    opacity: 0.2;
-  }
-}
-
-.pages-legend .open-network-manager {
-  margin-bottom: 10px;
-}

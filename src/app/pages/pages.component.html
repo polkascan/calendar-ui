@@ -37,24 +37,18 @@
     </a>
   </div>
 
-  <div class="pages-date-picker">
-    <div class="pages-date-picker-tools">
-      <mat-card class="calendar-card" style="width: 300px;">
-        <mat-calendar #calendar [selected]="date | async"
-                      [dateClass]="dateClassFn" [startAt]="date | async"></mat-calendar>
-      </mat-card>
-      <div class="pages-legend">
-        <button mat-stroked-button class="open-network-manager" (click)="openNetworkManager()">
-          <mat-icon aria-hidden="false" aria-label="Manage networks">settings</mat-icon>
-          Networks
-        </button>
-        <ng-container *ngFor="let network of ns.activeNetworks | async">
-          <div class="pages-legend-item"
-               [style.--ps-pages-legend-item-color]="network.config.color"
-               [class.pages-legend-item--loading]="(network.initializing | async) || (network.loading | async)"
-               [class.pages-legend-item--failed]="(network.failed | async)">{{network.config.name}}</div>
-        </ng-container>
+  <div class="pages-sidebar">
+    <div class="pages-date-picker">
+      <div class="pages-date-picker-tools">
+        <mat-card class="calendar-card" style="width: 300px;">
+          <mat-calendar #calendar [selected]="date | async"
+                        [dateClass]="dateClassFn" [startAt]="date | async"></mat-calendar>
+        </mat-card>
       </div>
+    </div>
+
+    <div class="pages-filters">
+      <app-network-filter></app-network-filter>
     </div>
   </div>
 

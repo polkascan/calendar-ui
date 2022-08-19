@@ -11,7 +11,7 @@ import { NetworkService } from '../../services/network.service';
   styleUrls: ['./network-manager.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NetworkManager implements OnInit, OnDestroy {
+export class NetworkManagerComponent implements OnInit, OnDestroy {
   destroyer = new Subject<void>();
   networks = new BehaviorSubject<Network[]>([]);
   networkActiveFormControls = new Map<Network, FormControl<boolean|null>>();
@@ -143,7 +143,7 @@ export class NetworkManager implements OnInit, OnDestroy {
       this.selectedNetwork.next(null);
     }
     this.networkActiveFormControls.delete(network);
-    let index: number = this.networks.value.indexOf(network);
+    const index: number = this.networks.value.indexOf(network);
     if (index > -1) {
       this.networks.value.splice(index, 1);
       this.networks.next(this.networks.value);
