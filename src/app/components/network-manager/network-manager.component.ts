@@ -3,6 +3,7 @@ import { BehaviorSubject, combineLatestWith, mergeWith, skip, Subject, takeUntil
 import { Network, PolkadaptService } from '../../services/polkadapt.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NetworkService } from '../../services/network.service';
+import { FiltersService } from '../../services/filters.service';
 
 
 @Component({
@@ -11,7 +12,7 @@ import { NetworkService } from '../../services/network.service';
   styleUrls: ['./network-manager.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NetworkManager implements OnInit, OnDestroy {
+export class NetworkManagerComponent implements OnInit, OnDestroy {
   destroyer = new Subject<void>();
   networks = new BehaviorSubject<Network[]>([]);
   networkActiveFormControls = new Map<Network, FormControl<boolean|null>>();
@@ -24,7 +25,8 @@ export class NetworkManager implements OnInit, OnDestroy {
 
   constructor(
     private ns: NetworkService,
-    private pa: PolkadaptService
+    private pa: PolkadaptService,
+    private fs: FiltersService
   ) { }
 
   ngOnInit(): void {
@@ -72,6 +74,7 @@ export class NetworkManager implements OnInit, OnDestroy {
           void this.ns.enableNetworks([network.name]);
         } else {
           this.ns.disableNetwork(network.name);
+          this.fs.removeHiddenNetwork(network.name)
         }
       });
     }
@@ -83,6 +86,7 @@ export class NetworkManager implements OnInit, OnDestroy {
           void this.ns.enableNetworks([selectedNetwork.name]);
         } else {
           this.ns.disableNetwork(selectedNetwork.name);
+          this.fs.removeHiddenNetwork(selectedNetwork.name);
         }
       }
     });
@@ -132,6 +136,7 @@ export class NetworkManager implements OnInit, OnDestroy {
         void this.ns.enableNetworks([network.name]);
       } else {
         this.ns.disableNetwork(network.name);
+        this.fs.removeHiddenNetwork(network.name)
       }
     });
     this.selectNetwork(network);
@@ -143,11 +148,12 @@ export class NetworkManager implements OnInit, OnDestroy {
       this.selectedNetwork.next(null);
     }
     this.networkActiveFormControls.delete(network);
-    let index: number = this.networks.value.indexOf(network);
+    const index: number = this.networks.value.indexOf(network);
     if (index > -1) {
       this.networks.value.splice(index, 1);
       this.networks.next(this.networks.value);
     }
     this.ns.deleteCustomNetwork(network.name);
+    this.fs.removeHiddenNetwork(network.name);
   }
 }

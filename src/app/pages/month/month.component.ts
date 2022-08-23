@@ -83,7 +83,7 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
             date: prevDate,
             inPrevMonth: true,
             inPrevYear: hasPrevYear,
-            hoursWithItems: this.cal.getEventItemsPerHour(prevDate),
+            hoursWithItems: this.cal.getFilteredItemsPerHour(prevDate),
           });
           p--;
         }
@@ -114,7 +114,7 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
             dateColumn.inNextMonth = true;
             dateColumn.inNextYear = hasNextYear;
           }
-          dateColumn.hoursWithItems = this.cal.getEventItemsPerHour(nextDate);
+          dateColumn.hoursWithItems = this.cal.getFilteredItemsPerHour(nextDate);
           dates.push(dateColumn);
           a++;
         }

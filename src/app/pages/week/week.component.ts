@@ -86,7 +86,7 @@ export class WeekComponent implements OnInit, OnDestroy {
           date,
           isFirstDayOfMonth: date.getDate() === 1,
           isFirstDayOfYear: date.getMonth() === 0,
-          hoursWithItems: this.cal.getEventItemsPerHour(date),
+          hoursWithItems: this.cal.getFilteredItemsPerHour(date),
         };
       })),
       shareReplay(1)

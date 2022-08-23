@@ -30,10 +30,6 @@ import { MatCalendar, MatCalendarCellClassFunction } from '@angular/material/dat
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { getLocalDateString, getTodayDate } from '../services/helpers';
 import { CalendarService } from '../services/calendar.service';
-import { NetworkManager } from '../components/network-manager/network-manager.component';
-import { MatDialog } from '@angular/material/dialog';
-import { NetworkService } from '../services/network.service';
-import { PolkadotJsScheduledService } from '../services/polkadot-js-scheduled.service';
 
 const viewNames = ['month', 'week', 'day'] as const;
 type ViewName = typeof viewNames[number];
@@ -54,7 +50,6 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   date = new BehaviorSubject<Date | null>(null);
   view = new BehaviorSubject<ViewName>('month');
   navProperties = new BehaviorSubject<NavProperties | null>(null);
-  networkConfig = new Map();
 
   @ViewChild('calendar', {static: false}) calendar: MatCalendar<Date>;
 
@@ -78,9 +73,7 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private cal: CalendarService,
-    public dialog: MatDialog,
-    public ns: NetworkService
+    private cal: CalendarService
   ) {
   }
 
@@ -199,9 +192,5 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
       const {view} = navProps;
       void this.router.navigate([view]);
     }
-  }
-
-  openNetworkManager(): void {
-    this.dialog.open(NetworkManager, {maxWidth: '100vw'});
   }
 }

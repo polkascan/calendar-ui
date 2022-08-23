@@ -19,15 +19,21 @@
 import { Injectable } from '@angular/core';
 import { CalenderItemsPerChain, PolkadotJsScheduledService } from './polkadot-js-scheduled.service';
 import { EventItem } from '../pages/types';
-import { BehaviorSubject, map, Observable, startWith, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, map, Observable, OperatorFunction, startWith, Subject, Subscription } from 'rxjs';
 import { getLocalDateString } from './helpers';
-import { PolkadaptService } from './polkadapt.service';
+
+type FilterFunction = (item: EventItem) => boolean;
+
+type FilterDef = {
+  [name: string]: FilterFunction
+};
 
 @Injectable({providedIn: 'root'})
 export class CalendarService {
   eventItemsChanged = new Subject<void>();
   eventItemsSubscription: Subscription;
   private eventItems: { [date: string]: BehaviorSubject<EventItem[]> } = {};
+  private activeFilters = new BehaviorSubject<FilterDef>({});
 
   constructor(private pjss: PolkadotJsScheduledService) {
 
@@ -85,9 +91,31 @@ export class CalendarService {
     }
   }
 
-  getEventItemsPerHour(date: Date): Observable<EventItem[][]> {
+  setFilter(name: string, filter: FilterFunction): void {
+    this.activeFilters.value[name] = filter;
+    this.activeFilters.next(this.activeFilters.value);
+  }
+
+  removeFilter(name: string): void {
+    delete this.activeFilters.value[name];
+    this.activeFilters.next(this.activeFilters.value);
+  }
+
+  getFilteredItems(date: string): Observable<EventItem[]> {
+    return this.getEventItems(date).pipe(
+      combineLatestWith(this.activeFilters),
+      map<[EventItem[], FilterDef], EventItem[]>(([items, filters]): EventItem[] => {
+        for (const f of Object.values(filters)) {
+          items = items.filter(f);
+        }
+        return items;
+      })
+    );
+  }
+
+  getFilteredItemsPerHour(date: Date): Observable<EventItem[][]> {
     const dateKey: string = getLocalDateString(date);
-    return this.getEventItems(dateKey).pipe(
+    return this.getFilteredItems(dateKey).pipe(
       map<EventItem[], EventItem[][]>(items => {
         const itemsPerHour: EventItem[][] = [];
         for (let i = 0; i < 24; i++) {

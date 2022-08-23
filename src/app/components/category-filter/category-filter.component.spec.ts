@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NetworkManagerComponent } from './network-manager.component';
+import { CategoryFilterComponent } from './category-filter.component';
 
-describe('ChainManagerComponent', () => {
-  let component: NetworkManagerComponent;
-  let fixture: ComponentFixture<NetworkManagerComponent>;
+describe('CategoryFilterComponent', () => {
+  let component: CategoryFilterComponent;
+  let fixture: ComponentFixture<CategoryFilterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NetworkManagerComponent ]
+      declarations: [ CategoryFilterComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(NetworkManagerComponent);
+    fixture = TestBed.createComponent(CategoryFilterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
