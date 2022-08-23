@@ -59,7 +59,7 @@ export class DayComponent implements OnInit, OnDestroy {
       map<Date, DateColumn>((date) => {
         const dateColumn: DateColumn = {
           date: date,
-          hoursWithItems: this.cal.getEventItemsPerHour(date)
+          hoursWithItems: this.cal.getFilteredItemsPerHour(date)
         };
 
         const dayCount = date.getDate();

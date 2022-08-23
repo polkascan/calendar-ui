@@ -1,0 +1,3 @@
+<div class="category-filter" [formGroup]="categoryFilterForm">
+  <mat-checkbox *ngFor="let cat of categories" [formControlName]="cat[0]">{{ cat[1].label }}</mat-checkbox>
+</div>

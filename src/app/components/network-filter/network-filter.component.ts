@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { NetworkManagerComponent } from '../network-manager/network-manager.component';
 import { MatDialog } from '@angular/material/dialog';
 import { NetworkService } from '../../services/network.service';
+import { CalendarService } from '../../services/calendar.service';
 
 @Component({
   selector: 'app-network-filter',
@@ -10,11 +11,13 @@ import { NetworkService } from '../../services/network.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NetworkFilterComponent implements OnInit {
+  filterName = 'network';
   panelOpenState = true;
   hiddenNetworks: string[] = [];
 
   constructor(public ns: NetworkService,
               public dialog: MatDialog,
+              private cal: CalendarService,
               private cd: ChangeDetectorRef) {
   }
 
@@ -47,5 +50,15 @@ export class NetworkFilterComponent implements OnInit {
   resetFilter(): void {
     this.hiddenNetworks = [];
     window.localStorage.removeItem('calendarNetworkFilter');
+  }
+
+  setFilter(): void {
+    if (this.hiddenNetworks.length) {
+      this.cal.setFilter(this.filterName, (item) => {
+        return !this.hiddenNetworks.includes(item.network.name);
+      });
+    } else {
+      this.cal.removeFilter(this.filterName)
+    }
   }
 }

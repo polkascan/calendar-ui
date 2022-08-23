@@ -36,6 +36,7 @@ import { NetworkManagerComponent } from '../components/network-manager/network-m
 import { NetworkFilterComponent } from '../components/network-filter/network-filter.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { CategoryFilterComponent } from '../components/category-filter/category-filter.component';
 
 
 @Injectable()
@@ -50,7 +51,8 @@ class MondayFirstDateAdapter extends NativeDateAdapter {
   declarations: [
     PagesComponent,
     NetworkManagerComponent,
-    NetworkFilterComponent
+    NetworkFilterComponent,
+    CategoryFilterComponent
   ],
   imports: [
     CommonModule,
