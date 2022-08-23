@@ -3,6 +3,7 @@ import { BehaviorSubject, combineLatestWith, mergeWith, skip, Subject, takeUntil
 import { Network, PolkadaptService } from '../../services/polkadapt.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NetworkService } from '../../services/network.service';
+import { FiltersService } from '../../services/filters.service';
 
 
 @Component({
@@ -24,7 +25,8 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
 
   constructor(
     private ns: NetworkService,
-    private pa: PolkadaptService
+    private pa: PolkadaptService,
+    private fs: FiltersService
   ) { }
 
   ngOnInit(): void {
@@ -72,7 +74,7 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
           void this.ns.enableNetworks([network.name]);
         } else {
           this.ns.disableNetwork(network.name);
-          this.removeFromNetworkFilter(network.name)
+          this.fs.removeHiddenNetwork(network.name)
         }
       });
     }
@@ -84,7 +86,7 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
           void this.ns.enableNetworks([selectedNetwork.name]);
         } else {
           this.ns.disableNetwork(selectedNetwork.name);
-          this.removeFromNetworkFilter(selectedNetwork.name);
+          this.fs.removeHiddenNetwork(selectedNetwork.name);
         }
       }
     });
@@ -113,7 +115,6 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
         void this.pa.setSubstrateRpcUrl(network.name, url).then();
         if (network.isCustom) {
           this.ns.disableNetwork(network.name);
-          this.removeFromNetworkFilter(network.name);
           this.ns.setCustomNetwork(network.name, network.config.name, url);
           void this.ns.enableNetworks([network.name]).then();
         } else if (this.pa.networks[network.name].failed.value) {
@@ -135,7 +136,7 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
         void this.ns.enableNetworks([network.name]);
       } else {
         this.ns.disableNetwork(network.name);
-        this.removeFromNetworkFilter(network.name)
+        this.fs.removeHiddenNetwork(network.name)
       }
     });
     this.selectNetwork(network);
@@ -153,14 +154,6 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
       this.networks.next(this.networks.value);
     }
     this.ns.deleteCustomNetwork(network.name);
-    this.removeFromNetworkFilter(network.name);
-  }
-
-  removeFromNetworkFilter(name: string): void {
-    const storedHiddenNetworks = localStorage[`calendarNetworkFilter`];
-    if (storedHiddenNetworks) {
-      const hiddenNetworks = storedHiddenNetworks;
-      localStorage[`calendarNetworkFilter`] = hiddenNetworks.filter((n: string) => n !== name);
-    }
+    this.fs.removeHiddenNetwork(network.name);
   }
 }

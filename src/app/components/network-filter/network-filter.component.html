@@ -28,19 +28,22 @@
       <span class="material-symbols-outlined">{{ panelOpenState ? 'expand_more' : 'expand_less' }}</span>
     </mat-icon>
   </mat-expansion-panel-header>
+
   <button mat-stroked-button class="network-filter-open-network-manager" (click)="openNetworkManager()" title="Network Manager">
     <mat-icon aria-hidden="false" aria-label="Manage networks">settings</mat-icon>
     Networks
   </button>
-  <button mat-stroked-button class="network-filter-reset" title="Reset filter" (click)="resetFilter()">
+  <button mat-stroked-button class="network-filter-reset" title="Reset filter" (click)="fs.resetNetworkFilter()">
     <mat-icon aria-hidden="true" class="network-filter-reset-icon">
       <span class="material-symbols-outlined">replay</span>
     </mat-icon>
   </button>
+
   <div class="network-filter-item" *ngFor="let network of ns.activeNetworks | async"
        [style.--ps-network-filter-item-color]="network.config.color"
        [class.network-filter-item--loading]="(network.initializing | async) || (network.loading | async)"
        [class.network-filter-item--failed]="(network.failed | async)">
+
     <div class="network-filter-item-logo">
       <img *ngIf="network.config.logo" [src]="network.config.logo" alt="Logo">
       <span class="network-filter-item-logo-custom"
@@ -48,8 +51,8 @@
     </div>
     <div class="network-filter-item-name">{{network.config.name}}</div>
     <div class="network-filter-item-button">
-      <button mat-icon-button *ngIf="{value: hiddenNetworks.indexOf(network.name) !== -1 } as hidden"
-              (click)="toggleNetworkVisibility(network.name)">
+      <button mat-icon-button *ngIf="{value: fs.hiddenNetworks.indexOf(network.name) !== -1 } as hidden"
+              (click)="fs.toggleNetworkVisibility(network.name)">
         <mat-icon aria-hidden="true" class="network-filter-visibility-icon"
                   [class.network-filter-visibility-icon--on]="!hidden.value"
                   [class.network-filter-visibility-icon--off]="hidden.value"

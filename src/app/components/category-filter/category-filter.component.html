@@ -1,3 +1,18 @@
-<div class="category-filter" [formGroup]="categoryFilterForm">
-  <mat-checkbox *ngFor="let cat of categories" [formControlName]="cat[0]">{{ cat[1].label }}</mat-checkbox>
-</div>
+<mat-expansion-panel hideToggle [expanded]="panelOpenState"
+                     (opened)="panelOpenState = true"
+                     (closed)="panelOpenState = false">
+
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      Categories
+    </mat-panel-title>
+    <mat-icon aria-hidden="true" class="category-filter-expand-icon">
+      <span class="material-symbols-outlined">{{ panelOpenState ? 'expand_more' : 'expand_less' }}</span>
+    </mat-icon>
+  </mat-expansion-panel-header>
+
+  <div class="category-filter" [formGroup]="categoryFilterForm">
+    <mat-checkbox *ngFor="let cat of categories" [formControlName]="cat[0]">{{ cat[1].label }}</mat-checkbox>
+  </div>
+
+</mat-expansion-panel>

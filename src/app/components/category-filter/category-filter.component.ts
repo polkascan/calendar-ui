@@ -18,6 +18,7 @@ type Category = [
 })
 export class CategoryFilterComponent implements OnInit {
   filterName = 'categories';
+  panelOpenState = true;
   categories: Category[] = [
     ['staking', {label: 'Staking', eventTypes: ['stakingEra', 'stakingEpoch', 'stakingSlash']}],
     ['schedule', {label: 'Schedule', eventTypes: ['scheduler']}],
@@ -33,13 +34,13 @@ export class CategoryFilterComponent implements OnInit {
   constructor(private cal: CalendarService) { }
 
   ngOnInit(): void {
-    this.hiddenCategories = localStorage['calendarHiddenCategories'] || [];
+    this.hiddenCategories = JSON.parse(localStorage.getItem('calendarHiddenCategories') || '[]');
     if (this.hiddenCategories.length) {
       this.setFilter();
     }
 
     for (const [name, params] of this.categories) {
-      const control = new FormControl<boolean>(true);
+      const control = new FormControl<boolean>(!this.hiddenCategories.includes(name));
       this.categoryFilterForm.addControl(name, control);
       control.valueChanges.subscribe(showCategory => {
         if (showCategory) {
@@ -47,7 +48,7 @@ export class CategoryFilterComponent implements OnInit {
         } else {
           this.hiddenCategories.push(name);
         }
-        localStorage['calendarHiddenCategories'] = this.hiddenCategories;
+        localStorage.setItem('calendarHiddenCategories', JSON.stringify(this.hiddenCategories));
         this.setFilter();
       });
     }
