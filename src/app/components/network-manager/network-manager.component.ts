@@ -72,6 +72,7 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
           void this.ns.enableNetworks([network.name]);
         } else {
           this.ns.disableNetwork(network.name);
+          this.removeFromNetworkFilter(network.name)
         }
       });
     }
@@ -83,6 +84,7 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
           void this.ns.enableNetworks([selectedNetwork.name]);
         } else {
           this.ns.disableNetwork(selectedNetwork.name);
+          this.removeFromNetworkFilter(selectedNetwork.name);
         }
       }
     });
@@ -111,6 +113,7 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
         void this.pa.setSubstrateRpcUrl(network.name, url).then();
         if (network.isCustom) {
           this.ns.disableNetwork(network.name);
+          this.removeFromNetworkFilter(network.name);
           this.ns.setCustomNetwork(network.name, network.config.name, url);
           void this.ns.enableNetworks([network.name]).then();
         } else if (this.pa.networks[network.name].failed.value) {
@@ -132,6 +135,7 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
         void this.ns.enableNetworks([network.name]);
       } else {
         this.ns.disableNetwork(network.name);
+        this.removeFromNetworkFilter(network.name)
       }
     });
     this.selectNetwork(network);
@@ -149,5 +153,14 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
       this.networks.next(this.networks.value);
     }
     this.ns.deleteCustomNetwork(network.name);
+    this.removeFromNetworkFilter(network.name);
+  }
+
+  removeFromNetworkFilter(name: string): void {
+    const storedHiddenNetworks = window.localStorage.getItem(`calendarNetworkFilter`);
+    if (storedHiddenNetworks) {
+      const hiddenNetworks = JSON.parse(storedHiddenNetworks) as string[];
+      window.localStorage.setItem(`calendarNetworkFilter`, JSON.stringify(hiddenNetworks.filter((n) => n !== name)));
+    }
   }
 }

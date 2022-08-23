@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { NetworkManagerComponent } from '../network-manager/network-manager.component';
 import { MatDialog } from '@angular/material/dialog';
 import { NetworkService } from '../../services/network.service';
@@ -14,12 +14,19 @@ export class NetworkFilterComponent implements OnInit {
   hiddenNetworks: string[] = [];
 
   constructor(public ns: NetworkService,
-              public dialog: MatDialog) {
+              public dialog: MatDialog,
+              private cd: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
     // Load initial settings for hidden networks.
-    return;
+    this.ns.activeNetworks.subscribe(() => {
+      const storedHiddenNetworks = window.localStorage.getItem(`calendarNetworkFilter`);
+      if (storedHiddenNetworks) {
+        this.hiddenNetworks = JSON.parse(storedHiddenNetworks) as string[];
+        this.cd.markForCheck();
+      }
+    })
   }
 
   openNetworkManager(): void {
@@ -31,7 +38,14 @@ export class NetworkFilterComponent implements OnInit {
     if (index === -1) {
       this.hiddenNetworks.push(name);
     } else {
-      this.hiddenNetworks.splice(1, index);
+      this.hiddenNetworks = this.hiddenNetworks.filter((n) => n !== name);
     }
+
+    window.localStorage.setItem('calendarNetworkFilter', JSON.stringify(this.hiddenNetworks));
+  }
+
+  resetFilter(): void {
+    this.hiddenNetworks = [];
+    window.localStorage.removeItem('calendarNetworkFilter');
   }
 }
