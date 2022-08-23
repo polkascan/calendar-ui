@@ -24,12 +24,13 @@ export class NetworkFilterComponent implements OnInit {
   ngOnInit(): void {
     // Load initial settings for hidden networks.
     this.ns.activeNetworks.subscribe(() => {
-      const storedHiddenNetworks = window.localStorage.getItem(`calendarNetworkFilter`);
+      const storedHiddenNetworks = localStorage[`calendarNetworkFilter`];
       if (storedHiddenNetworks) {
-        this.hiddenNetworks = JSON.parse(storedHiddenNetworks) as string[];
+        this.hiddenNetworks = storedHiddenNetworks;
+        this.setFilter();
         this.cd.markForCheck();
       }
-    })
+    });
   }
 
   openNetworkManager(): void {
@@ -44,12 +45,14 @@ export class NetworkFilterComponent implements OnInit {
       this.hiddenNetworks = this.hiddenNetworks.filter((n) => n !== name);
     }
 
-    window.localStorage.setItem('calendarNetworkFilter', JSON.stringify(this.hiddenNetworks));
+    localStorage['calendarNetworkFilter'] = this.hiddenNetworks;
+    this.setFilter();
   }
 
   resetFilter(): void {
     this.hiddenNetworks = [];
-    window.localStorage.removeItem('calendarNetworkFilter');
+    localStorage.removeItem('calendarNetworkFilter');
+    this.setFilter();
   }
 
   setFilter(): void {

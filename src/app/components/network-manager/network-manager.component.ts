@@ -157,10 +157,10 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
   }
 
   removeFromNetworkFilter(name: string): void {
-    const storedHiddenNetworks = window.localStorage.getItem(`calendarNetworkFilter`);
+    const storedHiddenNetworks = localStorage[`calendarNetworkFilter`];
     if (storedHiddenNetworks) {
-      const hiddenNetworks = JSON.parse(storedHiddenNetworks) as string[];
-      window.localStorage.setItem(`calendarNetworkFilter`, JSON.stringify(hiddenNetworks.filter((n) => n !== name)));
+      const hiddenNetworks = storedHiddenNetworks;
+      localStorage[`calendarNetworkFilter`] = hiddenNetworks.filter((n: string) => n !== name);
     }
   }
 }
