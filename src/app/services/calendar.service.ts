@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import { CalenderItemsPerChain, PolkadotJsScheduledService } from './polkadot-js-scheduled.service';
 import { EventItem } from '../pages/types';
-import { BehaviorSubject, combineLatestWith, map, Observable, OperatorFunction, startWith, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, map, Observable, startWith, Subject, Subscription } from 'rxjs';
 import { getLocalDateString } from './helpers';
 
 type FilterFunction = (item: EventItem) => boolean;

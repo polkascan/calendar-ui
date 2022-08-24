@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NetworkManagerComponent } from '../network-manager/network-manager.component';
 import { MatDialog } from '@angular/material/dialog';
 import { NetworkService } from '../../services/network.service';
-import { CalendarService } from '../../services/calendar.service';
 import { FiltersService } from '../../services/filters.service';
 
 @Component({
@@ -16,9 +15,7 @@ export class NetworkFilterComponent {
 
   constructor(public ns: NetworkService,
               public dialog: MatDialog,
-              public fs: FiltersService,
-              private cal: CalendarService,
-              private cd: ChangeDetectorRef) {
+              public fs: FiltersService) {
   }
 
   openNetworkManager(): void {

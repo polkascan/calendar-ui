@@ -58,8 +58,8 @@ export class NetworkService {
     // When there are no persistent settings or there is no active network, look for default active chains in the config.
     if (activatedNetworks.length === 0) {
       activatedNetworks = Object.entries(this.pa.networks)
-        .filter(([_, network]) => network.config.defaultActive)
-        .map(([n, _]) => n)
+        .filter(entry => entry[1].config.defaultActive)
+        .map(entry => entry[0])
     }
 
     await this.enableNetworks(activatedNetworks);

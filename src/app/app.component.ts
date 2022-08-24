@@ -17,7 +17,6 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { PolkadotJsScheduledService } from './services/polkadot-js-scheduled.service';
 import { NetworkService } from './services/network.service';
 
 @Component({

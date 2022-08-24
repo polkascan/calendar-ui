@@ -35,7 +35,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NetworkManagerComponent } from '../components/network-manager/network-manager.component';
 import { NetworkFilterComponent } from '../components/network-filter/network-filter.component';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CategoryFilterComponent } from '../components/category-filter/category-filter.component';
 
 

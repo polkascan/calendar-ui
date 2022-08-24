@@ -70,12 +70,22 @@ import 'zone.js';  // Included with Angular CLI.
  * APPLICATION IMPORTS
  */
 
+import 'buffer';
+
+interface CustomWindow extends Window {
+  global?: unknown
+  buffer?: unknown;
+  Buffer?: unknown;
+  process?: unknown;
+}
+
+const win: CustomWindow = window;
+
 // Crypto browserify uses global in NodeJS, use window instead.
-(window as any).global = window;
+win.global = window;
 
 // Add browserify version of buffer, installed as dependency.
-(window as any).Buffer =  (window as any).buffer || require('buffer').Buffer;
+win.Buffer = win.buffer || Buffer;
 
-// Add browserify version of process, already installed as subdependency.
-(window as any).process = require('process');
-
+// Add browserify version of process, already installed as sub-dependency.
+win.process = require('process');

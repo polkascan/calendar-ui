@@ -34,12 +34,12 @@ export class CategoryFilterComponent implements OnInit {
   constructor(private cal: CalendarService) { }
 
   ngOnInit(): void {
-    this.hiddenCategories = JSON.parse(localStorage.getItem('calendarHiddenCategories') || '[]');
+    this.hiddenCategories = JSON.parse(localStorage.getItem('calendarHiddenCategories') || '[]') as string[];
     if (this.hiddenCategories.length) {
       this.setFilter();
     }
 
-    for (const [name, params] of this.categories) {
+    for (const [name] of this.categories) {
       const control = new FormControl<boolean>(!this.hiddenCategories.includes(name));
       this.categoryFilterForm.addControl(name, control);
       control.valueChanges.subscribe(showCategory => {

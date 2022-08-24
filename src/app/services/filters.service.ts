@@ -7,7 +7,7 @@ export class FiltersService {
   hiddenNetworks: string[];
 
   constructor(private cal: CalendarService) {
-    this.hiddenNetworks = JSON.parse(localStorage.getItem(this.networkStorageName) || '[]');
+    this.hiddenNetworks = JSON.parse(localStorage.getItem(this.networkStorageName) || '[]') as string[];
   }
 
   toggleNetworkVisibility(name: string): void {

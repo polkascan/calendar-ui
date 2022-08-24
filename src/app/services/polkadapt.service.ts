@@ -58,10 +58,10 @@ export class PolkadaptService {
   networks: Networks = {};
 
   private sleepDetectorWorker: Worker;
-  triggerReconnect: Subject<any> = new Subject();
+  triggerReconnect: Subject<null> = new Subject();
   private triggerReconnectSubscription: Subscription;
 
-  private onlineHandler: EventListener = (ev) => {
+  private onlineHandler: EventListener = () => {
     // In case the browser comes online, try and reconnect websockets.
     this.triggerReconnect.next(null);
   };
@@ -176,9 +176,7 @@ export class PolkadaptService {
         reject(`[PolkadaptService] Setting up adapter for ${network} exceeded time limit.`);
       }, 10000);
 
-      let apiPromise: ApiPromise | undefined;
       sAdapter.promise.then((p: ApiPromise) => {
-        apiPromise = p;
         if (!p) {
           reject(`[PolkadaptService] Setting up adapter for ${network} failed. No ApiPromise was created.`);
         } else {

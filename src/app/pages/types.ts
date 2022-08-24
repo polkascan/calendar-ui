@@ -25,7 +25,7 @@ export type EventItem = {
   date: Date;
   block: number;
   description: string;
-  data?: { [key: string]: any }
+  data?: { [key: string]: unknown }
 };
 
 export type DateColumn = {
@@ -51,5 +51,5 @@ export type PjsCalendarItemDuration = {
 export type PjsCalendarItem = PjsCalendarItemDuration & {
   network: Network;
   type: string;
-  data: { [key: string]: any };
+  data: { [key: string]: unknown };
 }

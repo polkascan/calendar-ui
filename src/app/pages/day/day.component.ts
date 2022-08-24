@@ -17,10 +17,10 @@
  */
 
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { distinctUntilChanged, interval, map, Observable, Subject, takeUntil } from 'rxjs';
+import { distinctUntilChanged, map, Observable, Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getCurrentTime, getDateFromRoute, getHourProgressPercentage, getTodayDate } from '../../services/helpers';
-import { DateColumn, EventItem } from '../types';
+import { DateColumn } from '../types';
 import { CalendarService } from '../../services/calendar.service';
 import { PolkadaptService } from '../../services/polkadapt.service';
 
@@ -118,11 +118,11 @@ export class DayComponent implements OnInit, OnDestroy {
     this.destroyer.complete();
   }
 
-  trackByHour(i: number, item: EventItem[]): number {
+  trackByHour(i: number): number {
     return i;
   }
 
-  trackByHourItems(i: number, item: EventItem): number {
+  trackByHourItems(i: number): number {
     return i;
   }
 }

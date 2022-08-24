@@ -20,6 +20,7 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
   networkForm = new FormGroup({
     name: new FormControl<string|null>(null),
     active: new FormControl<boolean>(true),
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     url: new FormControl<string|null>(null, [Validators.required, Validators.pattern(/^wss?:\/\/\S+$/)]),
   });
 
@@ -91,10 +92,12 @@ export class NetworkManagerComponent implements OnInit, OnDestroy {
       }
     });
     this.networkForm.controls.name.valueChanges.pipe(takeUntil(this.destroyer)).subscribe(name => {
-      const network: Network = this.selectedNetwork.value!;
-      this.ns.setCustomNetwork(network.name, name || '');
-      // Nothing actually changes, but we need to trigger the template.
-      this.networks.next(this.networks.value);
+      const network: Network | null = this.selectedNetwork.value;
+      if (network) {
+        this.ns.setCustomNetwork(network.name, name || '');
+        // Nothing actually changes, but we need to trigger the template.
+        this.networks.next(this.networks.value);
+      }
     });
   }
 
