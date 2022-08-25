@@ -89,6 +89,17 @@ fallback and custom switching capabilities.
 }
 ```
 
+Attributes per network.
+* name: string; the user-friendly network name.
+* defaultActive: boolean; activates this chain and shows the event items in the calendar. If a user uses the network manager to select his/her own networks then this property will be ignored. 
+* common: boolean; not used.
+* paraId: number; not used.
+* parachains: dict; contains parachains that use the network as relay chain.
+* logo: string; location or url to image.
+* color: string; must be css friendly color code;
+* substrateRpcUrls: dict; key is used as display name and value is used as websocket url.
+* homepage: string; not used.
+
 ## Build and run with Docker
 
 If you want a quick and easy way to run the application, you can build a [Docker](https://www.docker.com/get-started) image with the
