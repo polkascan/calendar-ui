@@ -174,6 +174,7 @@ export class PolkadaptService {
 
       const timeout = window.setTimeout((): void => {
         reject(`[PolkadaptService] Setting up adapter for ${network} exceeded time limit.`);
+        this.deactivateRPCAdapter(network);
       }, 10000);
 
       sAdapter.promise.then((p: ApiPromise) => {
