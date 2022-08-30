@@ -70,7 +70,7 @@ import 'zone.js';  // Included with Angular CLI.
  * APPLICATION IMPORTS
  */
 
-import 'buffer';
+import { Buffer } from 'buffer';
 
 interface CustomWindow extends Window {
   global?: unknown
