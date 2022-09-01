@@ -74,13 +74,13 @@
                 <div *ngFor="let item of hrsItems[y]; trackBy: trackByIndex"
                      [attr.class]="'week-calendar-item week-calendar-item-network--' + item.network.name + ' week-calendar-item-type--' + item.type"
                      [style.--ps-week-calendar-item-background-color]="chainColors[item.network.name]">
-                  <span class="week-calendar-item-time">{{ item.date | date: 'HH:mm' }}</span>
-                  <span class="week-calendar-item-logo">
+                  <div class="week-calendar-item-time">{{ item.date | date: 'HH:mm' }}</div>
+                  <div class="week-calendar-item-logo">
                     <img *ngIf="item.network.config.logo" [src]="item.network.config.logo" alt="Logo">
                     <span class="week-calendar-item-logo-custom" *ngIf="!item.network.config.logo">{{ item.network.config.name.substring(0, 2) }}</span>
-                  </span>
-                  <span class="week-calendar-item-block">{{ item.block }}</span>
-                  <span class="week-calendar-item-description">{{ item.description }}</span>
+                  </div>
+                  <div class="week-calendar-item-block">{{ item.block }}</div>
+                  <div class="week-calendar-item-description">{{ item.description }}</div>
                 </div>
 
               </div>

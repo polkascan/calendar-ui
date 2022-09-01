@@ -118,10 +118,19 @@
 
 .day-calendar-item {
   position: relative;
-  padding: 0.2em 0;
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-start;
+  padding: 4px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--ps-day-calendar-item-background-color);
+  margin: 4px 0;
+  border-radius: 2px 2px 10px 10px;
+  box-shadow: 2px 2px 7px 1px rgb(0 0 0 / 40%);
+
+  display: grid;
+  grid-template-columns: min-content min-content auto;
+  grid-template-rows: min-content min-content;
+  align-items: start;
+  column-gap: 4px;
 }
 
 .day-calendar-row-empty-item {
@@ -129,39 +138,35 @@
 }
 
 .day-calendar-item-block {
-  margin-right: 5px;
-  padding: 2px 5px;
+  height: 28px;
+  line-height: 28px;
+  padding: 0 5px;
   color: white;
-  text-shadow: -0.5px -0.5px 0 rgba(0,0,0,0.2), 0.5px -0.5px 0 rgba(0,0,0,0.2), -0.5px 0.5px 0 rgba(0,0,0,0.2), 0.5px 0.5px 0 rgba(0,0,0,0.2);
+  text-shadow: -0.5px -0.5px 0 rgba(0,0,0,0.8), 0.5px -0.5px 0 rgba(0,0,0,0.8), -0.5px 0.5px 0 rgba(0,0,0,0.8), 0.5px 0.5px 0 rgba(0,0,0,0.8);
   white-space: nowrap;
-  font-weight: bold;
   background: var(--ps-day-calendar-item-background-color);
 }
 
 .day-calendar-item-description {
-    word-break: break-word;
+  word-break: break-word;
+  grid-column: 2 / 4;
 }
 
 .day-calendar-item-time {
-  margin-right: 5px;
-  padding: 2px 5px;
-  border-radius: 6px;
-  background: lightgray;
-  color: black;
+  font-size: 0.8rem;
   white-space: nowrap;
+  justify-self: end;
 }
 
 .day-calendar-item-logo img {
   height: 28px;
   width: 28px;
-  margin-right: 5px;
 }
 
 .day-calendar-item-logo-custom {
   display: inline-block;
   height: 28px;
   min-width: 28px;
-  margin-right: 5px;
   border: solid 1px lightgray;
   text-align: center;
 }
