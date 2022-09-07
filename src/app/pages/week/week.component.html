@@ -6,7 +6,7 @@
         Week
       </button>
 
-      <h2 *ngIf="dates[0].date.getMonth() === dates[6].date.getMonth(); else spanMonths">
+      <h2 *ngIf="dates[0].date.getMonth() === dates[6].date.getMonth(); else spanMonths" class="week-toolbar-date-header">
         {{dates[0].date | date: 'LLLL yyyy'}}
       </h2>
 

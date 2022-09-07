@@ -3,7 +3,7 @@
     <div class="day-toolbar">
       <button mat-stroked-button [routerLink]="'/day/' + ((prevDayDate | async) | date : 'yyyy-MM-dd')">Previous Day
       </button>
-      <h2>{{dateColumn.date | date : 'd MMMM yyyy'}}</h2>
+      <h2 class="day-toolbar-date-header">{{dateColumn.date | date : 'd MMMM yyyy'}}</h2>
       <button mat-stroked-button [routerLink]="'/day/' + ((nextDayDate | async) | date : 'yyyy-MM-dd')">Next Day
       </button>
     </div>

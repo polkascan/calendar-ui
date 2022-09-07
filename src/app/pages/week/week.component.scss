@@ -37,15 +37,16 @@
   width: 100%;
 }
 
+.week-toolbar-date-header {
+  text-align: center;
+}
+
 .week-calendar {
-  position: relative;
   grid-area: calendar;
   display: grid;
   grid-template-columns: 90px repeat(7, minmax(7em, 1fr));
-  min-width: 100%;
   min-height: 100%;
   --ps-week-calendar-item-background-color: lightgray;
-  overflow-x: auto;
 }
 
 .week-calendar-header-column {
