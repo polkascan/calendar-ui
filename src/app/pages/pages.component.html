@@ -1,6 +1,7 @@
-<div class="pages-grid">
+<div class="pages-grid" [class.menu-visible]="menuVisible|async">
 
   <div class="pages-header">
+    <button mat-stroked-button class="pages-menu-button" type="button" (click)="toggleMenu()"><span class="material-icons">menu</span></button>
     <a class="pages-header-bar-brand" [routerLink]="'/'" tabindex="0">
       <svg viewBox="0 0 189 81" width="189" height="81" xmlns="http://www.w3.org/2000/svg">
         <g stroke="none" stroke-width="1" fill="none" fill-rule="nonzero">
@@ -17,16 +18,16 @@
       <span class="material-icons">
         calendar_today
       </span>
-      Today
+      <span class="extra-text">Today</span>
     </button>
     <button mat-flat-button (click)="selectView('month')" class="pages-view-button">
-      Month
+      <span class="basic-text">M</span><span class="extra-text">onth</span>
     </button>
     <button mat-flat-button (click)="selectView('week')" class="pages-view-button">
-      Week
+      <span class="basic-text">W</span><span class="extra-text">eek</span>
     </button>
     <button mat-flat-button (click)="selectView('day')" class="pages-view-button">
-      Day
+      <span class="basic-text">D</span><span class="extra-text">ay</span>
     </button>
     <a class="pages-github-link" href="https://github.com/polkascan/calendar-ui" target="_blank">
       <svg class="pages-github-logo" width="32" height="32" aria-hidden="true" viewBox="0 0 16 16"

@@ -2,8 +2,8 @@
   <div class="week-calendar-container" *ngIf="dateColumns | async as dates">
 
     <div class="week-toolbar">
-      <button mat-stroked-button [routerLink]="'/week/' + ((prevWeekDate | async) | date : 'yyyy-MM-dd')">Previous
-        Week
+      <button mat-stroked-button [routerLink]="'/week/' + ((prevWeekDate | async) | date : 'yyyy-MM-dd')">
+        <span>Previous</span><span class="extra-text"> Week</span>
       </button>
 
       <h2 *ngIf="dates[0].date.getMonth() === dates[6].date.getMonth(); else spanMonths" class="week-toolbar-date-header">
@@ -19,7 +19,8 @@
         </h2>
       </ng-template>
 
-      <button mat-stroked-button [routerLink]="'/week/' + ((nextWeekDate | async) | date : 'yyyy-MM-dd')">Next Week
+      <button mat-stroked-button [routerLink]="'/week/' + ((nextWeekDate | async) | date : 'yyyy-MM-dd')">
+        <span>Next</span><span class="extra-text"> Week</span>
       </button>
     </div>
 
@@ -67,7 +68,7 @@
                 </div>
               </ng-container>
 
-              <div class="week-calendar-column"
+              <div class="week-calendar-column" [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')"
                    [style.grid-column]="i + 2"
                    [style.grid-row]="y + 2">
 

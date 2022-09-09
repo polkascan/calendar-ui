@@ -16,33 +16,59 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-.pages-grid {
-  min-height: 100%;
-  width: 100%;
-  box-sizing: border-box;
 
+.pages-grid {
   display: grid;
-  grid-template-columns: min-content auto;
-  grid-template-rows: min-content auto;
   grid-template-areas:
-    "header header"
-    "sidebar calendars";
+    "calendars";
+  min-height: 100%;
+  box-sizing: border-box;
+  padding-top: 50px;
+
+  @media (min-width: 1265px) {
+    transition: padding-left 200ms ease-in;
+
+    &.menu-visible {
+      padding-left: 364px;
+      transition: padding-left 500ms ease-out;
+    }
+  }
 }
 
 .pages-header {
-  grid-area: header;
+  position: fixed;
+  z-index: 9001;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 50px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
   background: var(--ps-top-bar-bg-color);
   color: var(--ps-top-bar-text-color);
-  padding: 0 16px;
+  padding: 0 10px 0 0;
 
   .pages-today-button,
   .pages-view-button,
   .pages-github-link {
     margin-left: 10px;
+    min-width: 40px;
+    box-sizing: border-box;
+    padding: 0 6px;
+  }
+
+  .pages-github-link {
+    @media (max-width: 600px) {
+      display: none;
+    }
+  }
+
+  .pages-menu-button {
+    padding: 0 8px;
+    min-width: 50px;
+    box-sizing: border-box;
+    margin-right: 10px;
   }
 }
 
@@ -73,20 +99,33 @@
 }
 
 .pages-sidebar {
-  grid-area: sidebar;
-  margin-left: 16px;
-  margin-right: 16px;
-}
+  position: absolute;
+  z-index: 9000;
+  top: 50px;
+  bottom: 0;
+  left: 0;
+  padding: 16px;
+  width: 364px;
+  max-width: 100vw;
+  box-sizing: border-box;
+  background: white;
+  transform: translate(-100%, 0);
+  transition: transform 200ms ease-in 0ms, box-shadow 0ms linear 200ms;
 
-.pages-date-picker {
+  .menu-visible & {
+    @media (max-width: 1264px) {
+      position: fixed;
+      overflow-y: auto;
+      box-shadow: rgba(0, 0, 0, 0.5) 0 0 16px;
+    }
+    transform: translate(0, 0);
+    transition: transform 500ms ease-out;
+  }
 }
 
 .pages-calendars {
   grid-area: calendars;
   position: relative;
-}
-
-.pages-date-picker-tools {
 }
 
 .calendar-picker-date-past {
@@ -110,3 +149,8 @@
   }
 }
 
+.extra-text {
+  @media (max-width: 600px) {
+    display: none;
+  }
+}

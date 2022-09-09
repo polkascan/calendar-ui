@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getDateFromRoute, getTodayDate } from '../../services/helpers';
@@ -31,7 +31,7 @@ import { PolkadaptService } from '../../services/polkadapt.service';
   styleUrls: ['./month.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MonthComponent implements OnInit, OnDestroy {
   destroyer = new Subject<void>();
   date: Observable<Date>;
   dates: Observable<DateColumn[]>;
@@ -141,26 +141,6 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
     for (const n of Object.keys(this.pa.networks)) {
       this.chainColors[n] =  this.pa.networks[n].config.color;
     }
-  }
-
-  ngAfterViewInit(): void {
-    this.date.subscribe(date => {
-      let m: string = (date.getMonth() + 1).toString();
-      if (m.length === 1) {
-        m = '0' + m;
-      }
-      let d: string = date.getDate().toString();
-      if (d.length === 1) {
-        d = '0' + d;
-      }
-      const dateStr = `${date.getFullYear()}-${m}-${d}`;
-      const dateEl: HTMLElement | null = this.host.nativeElement.querySelector(`.month-calendar-${dateStr}`);
-      if (dateEl) {
-        setTimeout(() => {
-          dateEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
-        }, 100);
-      }
-    });
   }
 
   ngOnDestroy(): void {

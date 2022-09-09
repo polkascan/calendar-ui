@@ -2,20 +2,24 @@
   <div class="month-calendar-container">
 
     <div class="month-toolbar">
-      <button mat-stroked-button [routerLink]="'/month/' + ((prevMonthDate | async) | date : 'yyyy-MM-dd')">Previous Month</button>
+      <button mat-stroked-button [routerLink]="'/month/' + ((prevMonthDate | async) | date : 'yyyy-MM-dd')">
+        <span>Previous</span><span class="extra-text"> Month</span>
+      </button>
       <h2 class="month-toolbar-date-header">{{selectedDate | date: 'MMMM yyyy'}}</h2>
-      <button mat-stroked-button [routerLink]="'/month/' + ((nextMonthDate | async) | date : 'yyyy-MM-dd')">Next Month</button>
+      <button mat-stroked-button [routerLink]="'/month/' + ((nextMonthDate | async) | date : 'yyyy-MM-dd')">
+        <span>Next</span><span class="extra-text"> Month</span>
+      </button>
     </div>
 
     <div class="month-calendar">
       <div class="month-calendar-header-row">
-        <div class="month-calendar-header-column">Monday</div>
-        <div class="month-calendar-header-column">Tuesday</div>
-        <div class="month-calendar-header-column">Wednesday</div>
-        <div class="month-calendar-header-column">Thursday</div>
-        <div class="month-calendar-header-column">Friday</div>
-        <div class="month-calendar-header-column">Saturday</div>
-        <div class="month-calendar-header-column">Sunday</div>
+        <div class="month-calendar-header-column"><span>Mo</span><span class="extra-text">nday</span></div>
+        <div class="month-calendar-header-column"><span>Tu</span><span class="extra-text">esday</span></div>
+        <div class="month-calendar-header-column"><span>We</span><span class="extra-text">dnesday</span></div>
+        <div class="month-calendar-header-column"><span>Th</span><span class="extra-text">ursday</span></div>
+        <div class="month-calendar-header-column"><span>Fr</span><span class="extra-text">iday</span></div>
+        <div class="month-calendar-header-column"><span>Sa</span><span class="extra-text">turday</span></div>
+        <div class="month-calendar-header-column"><span>Su</span><span class="extra-text">nday</span></div>
       </div>
       <div class="month-calendar-row" *ngFor="let row of (columnsPerRow | async); trackBy: trackByIndex">
         <div class="month-calendar-column" *ngFor="let column of row; trackBy: trackByIndex"
@@ -26,7 +30,8 @@
              [class.month-calendar-column--next-year]="column.inNextYear"
              [class.month-calendar-column--past]="+column.date < +today"
              [class.month-calendar-column--selected]="+column.date === +selectedDate"
-             [class.month-calendar-column--today]="+column.date === +today">
+             [class.month-calendar-column--today]="+column.date === +today"
+             [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')">
           <div class="month-calendar-column-label">
             <button mat-flat-button class="month-calendar-column-label-button" [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')">
               {{ column.isFirstDayOfMonth ? (column.date | date : 'MMM') : '' }}

@@ -50,6 +50,7 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   date = new BehaviorSubject<Date | null>(null);
   view = new BehaviorSubject<ViewName>('month');
   navProperties = new BehaviorSubject<NavProperties | null>(null);
+  menuVisible = new BehaviorSubject<boolean>(window.matchMedia('(min-width: 1265px)').matches);
 
   @ViewChild('calendar', {static: false}) calendar: MatCalendar<Date>;
 
@@ -175,6 +176,10 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyer.next();
     this.destroyer.complete();
+  }
+
+  toggleMenu(): void {
+    this.menuVisible.next(!this.menuVisible.value);
   }
 
   selectView(view: ViewName): void {
