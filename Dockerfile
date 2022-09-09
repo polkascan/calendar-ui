@@ -43,6 +43,12 @@ ARG CONFIG_JSON=src/assets/config.json
 ENV CONFIG_JSON=$CONFIG_JSON
 COPY $CONFIG_JSON /usr/share/nginx/html/assets/config.json
 
+# Copy logo directory
+ARG LOGOS_DIR=src/assets/logos
+ENV LOGOS_DIR=$LOGOS_DIR
+COPY $LOGOS_DIR /usr/share/nginx/html/assets/logos
+
+
 EXPOSE 80
 
 CMD ["/bin/sh",  "-c",  "exec nginx -g 'daemon off;'"]
