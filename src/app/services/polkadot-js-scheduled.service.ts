@@ -55,81 +55,82 @@ export class PolkadotJsScheduledService {
 
   reloadAtBlockHeight: Map<string, number> = new Map();
 
-  private loading: Map<string, BehaviorSubject<boolean>> = new Map();
   private unsubscribeFns: Map<string, () => void> = new Map();
 
   constructor(private pa: PolkadaptService) {
   }
 
-  async initialize(): Promise<void> {
-    const networks = Object.keys(this.pa.networkAdapters);
+  async initializeChain(network: string): Promise<void> {
+    const bs = new BehaviorSubject<Header | null>(null);
+    const unsubFn = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).rpc.chain.subscribeNewHeads(
+      (header: Header) => bs.next(header)
+    );
+    this.newHeads.set(network, bs);
+    this.unsubscribeFns.set(network, unsubFn);
 
-    for (const network of networks) {
-      const bs = new BehaviorSubject<Header | null>(null);
-      const unsubFn = await this.pa.run(network).rpc.chain.subscribeNewHeads(
-        (header: Header) => bs.next(header)
-      );
-      this.newHeads.set(network, bs);
-      this.unsubscribeFns.set(network, unsubFn);
-      this.loading.set(network, new BehaviorSubject<boolean>(false));
+    await this.prefetchChainConsts(network);
 
-      await this.prefetchChainConsts(network);
-
-      const fetchData = async (blockNumber: number): Promise<void> => {
-        const loading = this.loading.get(network) as BehaviorSubject<boolean>;
-        if (loading && loading.getValue()) {
-          return;
-        }
-
-        loading.next(true);
-
-        if (!this.reloadAtBlockHeight.has(network) || blockNumber >= (this.reloadAtBlockHeight.get(network) as number)) {
-          // Reset the reload at block height to prevent Math.min to reuse the current value as lowest value.
-          this.reloadAtBlockHeight.delete(network);
-          // Reset calendarItems
-          this.calendarItemsPerChain.set(network, []);
-
-          await Promise.allSettled([
-            this.fetchActionInfo(network, blockNumber),
-            this.fetchCouncilMotions(network, blockNumber),
-            this.fetchDemocracyDispatches(network, blockNumber),
-            this.fetchReferendums(network, blockNumber),
-            this.fetchStakingInfo(network, blockNumber),
-            this.fetchScheduled(network, blockNumber),
-            this.fetchCouncilElection(network, blockNumber),
-            this.fetchDemocracyLaunch(network, blockNumber),
-            this.fetchTreasurySpend(network, blockNumber),
-            this.fetchSocietyRotate(network, blockNumber),
-            this.fetchSocietyChallenge(network, blockNumber),
-            this.fetchParachainLease(network, blockNumber)
-          ]);
-
-          loading.next(false);
-          this.dataChanged.next(this.calendarItemsPerChain);
-        }
+    const fetchData = async (blockNumber: number): Promise<void> => {
+      const loading = this.pa.networks[network].loading;
+      if (loading.value) {
+        return;
       }
 
-      bs.pipe(
-        filter((head): head is Header => !!head),
-        map<Header, number>((head) => {
-          return head.number.toNumber();
-        })
-      ).subscribe((v) => {
-        const reloadAt = this.reloadAtBlockHeight.get(network);
-        if (reloadAt && reloadAt < v) {
-          // No need to update when there is no change expected.
-          return;
-        }
-        void fetchData(v)
-      });
+      loading.next(true);
+
+      if (!this.reloadAtBlockHeight.has(network) || blockNumber >= (this.reloadAtBlockHeight.get(network) as number)) {
+        // Reset the reload at block height to prevent Math.min to reuse the current value as lowest value.
+        this.reloadAtBlockHeight.delete(network);
+        // Reset calendarItems
+        this.calendarItemsPerChain.set(network, []);
+
+        await Promise.allSettled([
+          this.fetchActionInfo(network, blockNumber),
+          this.fetchCouncilMotions(network, blockNumber),
+          this.fetchDemocracyDispatches(network, blockNumber),
+          this.fetchReferendums(network, blockNumber),
+          this.fetchStakingInfo(network, blockNumber),
+          this.fetchScheduled(network, blockNumber),
+          this.fetchCouncilElection(network, blockNumber),
+          this.fetchDemocracyLaunch(network, blockNumber),
+          this.fetchTreasurySpend(network, blockNumber),
+          this.fetchSocietyRotate(network, blockNumber),
+          this.fetchSocietyChallenge(network, blockNumber),
+          this.fetchParachainLease(network, blockNumber)
+        ]);
+        this.dataChanged.next(this.calendarItemsPerChain);
+      }
+
+      loading.next(false);
     }
+
+    bs.pipe(
+      filter((head): head is Header => !!head),
+      map<Header, number>((head) => {
+        return head.number.toNumber();
+      })
+    ).subscribe((v) => {
+      const reloadAt = this.reloadAtBlockHeight.get(network);
+      if (reloadAt && reloadAt < v) {
+        // No need to update when there is no change expected.
+        return;
+      }
+      void fetchData(v)
+    });
   }
 
-  destroy(): void {
-    this.newHeads.forEach((bs) => bs.complete());
-    this.newHeads.clear();
-    this.unsubscribeFns.forEach((fn) => fn());
-    this.unsubscribeFns.clear();
+  removeChain(network: string): void {
+    const bs = this.newHeads.get(network);
+    this.newHeads.delete(network);
+    bs ? bs.complete() : null;
+
+    const fn = this.unsubscribeFns.get(network);
+    this.unsubscribeFns.delete(network);
+    fn ? fn() : null;
+
+    this.calendarItemsPerChain.delete(network);
+    this.reloadAtBlockHeight.delete(network);
+    this.dataChanged.next(this.calendarItemsPerChain);
   }
 
   getNewHeads(network: string): BehaviorSubject<Header | null> | undefined {
@@ -171,9 +172,9 @@ export class PolkadotJsScheduledService {
 
     // For now we are only interested in Polkadot and Kusama. Therefor we fetch the blockTime from Babe.
     const blockTimes = await Promise.allSettled([
-      this.pa.run(network).consts.babe.expectedBlockTime,
-      this.pa.run(network).consts.difficulty.targetBlockTime,
-      this.pa.run(network).consts.subspace.expectedBlockTime
+      this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.babe.expectedBlockTime,
+      this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.difficulty.targetBlockTime,
+      this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.subspace.expectedBlockTime
     ]);
     const blockTime = blockTimes.find(result => result.status === 'fulfilled' && !!(result as PromiseFulfilledResult<u32>).value
     ) as PromiseFulfilledResult<u32> | undefined;
@@ -181,13 +182,13 @@ export class PolkadotJsScheduledService {
       consts.blockTime = Math.min(blockTime.value.toJSON() as number, 24 * 60 * 60 * 1000); // Max a day.
     } else {
       try {
-        const minPeriod = (await this.pa.run(network).consts.timestamp.minimumPeriod).toJSON() as number;
+        const minPeriod = (await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.timestamp.minimumPeriod).toJSON() as number;
         if (minPeriod && minPeriod >= 500) {
           consts.blockTime = minPeriod * 2;
         }
       } catch (e) {
         try {
-          if (await this.pa.run(network).query.parachainSystem) {
+          if (await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).query.parachainSystem) {
             consts.blockTime = defaultBlockTime * 2;
           }
         } catch (e) {
@@ -202,9 +203,9 @@ export class PolkadotJsScheduledService {
     // Jaco:  End of the current parachain auction
 
     const blockTime = this.getBlockTime(network);
-    const endingPeriod = await this.pa.run(network).consts.auctions.endingPeriod as u32;
-    const leasePeriodPerSlot = await this.pa.run(network).consts.auctions.leasePeriodsPerSlot as BlockNumber;
-    const auctionInfo = await this.pa.run(network).query.auctions.auctionInfo() as Option<ITuple<[LeasePeriodOf, BlockNumber]>>;
+    const endingPeriod = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.auctions.endingPeriod as u32;
+    const leasePeriodPerSlot = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.auctions.leasePeriodsPerSlot as BlockNumber;
+    const auctionInfo = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).query.auctions.auctionInfo() as Option<ITuple<[LeasePeriodOf, BlockNumber]>>;
 
     if (auctionInfo && auctionInfo.isSome) {
       const [leasePeriod, endBlock] = auctionInfo.unwrap();
@@ -215,7 +216,7 @@ export class PolkadotJsScheduledService {
       const endTimestamp = +(new Date()) + (blockTime * (endBlockNumber - blockNumber));
 
       const item: PjsCalendarItem = {
-        network,
+        network: this.pa.networks[network],
         type: 'parachainAuction',
         startDate: new Date(startTimestamp),
         endDate: new Date(endTimestamp),
@@ -234,7 +235,7 @@ export class PolkadotJsScheduledService {
     // Jaco:  Voting ends on council motion {{id}}
 
     const blockTime = this.getBlockTime(network);
-    const councilMotions: DeriveCollectiveProposal[] = await this.pa.run(network).derive.council.proposals();
+    const councilMotions: DeriveCollectiveProposal[] = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).derive.council.proposals();
 
     if (councilMotions) {
       councilMotions.forEach(({hash, votes}) => {
@@ -243,7 +244,7 @@ export class PolkadotJsScheduledService {
           const endTimestamp = +(new Date()) + (blockTime * (endBlockNumber - blockNumber));
 
           const item: PjsCalendarItem = {
-            network,
+            network: this.pa.networks[network],
             type: 'councilMotion',
             endDate: new Date(endTimestamp),
             endBlockNumber,
@@ -262,7 +263,7 @@ export class PolkadotJsScheduledService {
     // Jaco:  'Enactment of the result of referendum {{}}'
 
     const blockTime = this.getBlockTime(network);
-    const dispatches = await this.pa.run(network).derive.democracy.dispatchQueue();
+    const dispatches = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).derive.democracy.dispatchQueue();
 
     if (dispatches) {
       dispatches.forEach(({at, index}) => {
@@ -270,7 +271,7 @@ export class PolkadotJsScheduledService {
         const endTimestamp = +(new Date()) + (blockTime * (endBlockNumber - blockNumber));
 
         const item: PjsCalendarItem = {
-          network,
+          network: this.pa.networks[network],
           type: 'democracyDispatch',
           endDate: new Date(endTimestamp),
           endBlockNumber,
@@ -288,7 +289,7 @@ export class PolkadotJsScheduledService {
     // JACO: referendumVote  Voting ends for referendum'
 
     const blockTime = this.getBlockTime(network);
-    const referendums = await this.pa.run(network).derive.democracy.referendums();
+    const referendums = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).derive.democracy.referendums();
 
     if (referendums) {
       referendums.forEach(({index, status}) => {
@@ -301,7 +302,7 @@ export class PolkadotJsScheduledService {
         const voteEndTimestamp = +(new Date()) + (blockTime * (voteEndBlock - blockNumber));
 
         const enactItem: PjsCalendarItem = {
-          network,
+          network: this.pa.networks[network],
           type: 'referendumDispatch',
           endBlockNumber: enactEndBlock,
           endDate: new Date(enactEndTimestamp),
@@ -316,7 +317,7 @@ export class PolkadotJsScheduledService {
         this.addCalendarItem(network, enactItem);
 
         const voteItem: PjsCalendarItem = {
-          network,
+          network: this.pa.networks[network],
           type: 'referendumVote',
           endBlockNumber: voteEndBlock,
           endDate: new Date(voteEndTimestamp),
@@ -340,7 +341,7 @@ export class PolkadotJsScheduledService {
     // JACO:  stakingSlash   Application of slashes from era
 
     const blockTime = this.getBlockTime(network);
-    const sessionInfo = await this.pa.run(network).derive.session.progress();
+    const sessionInfo = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).derive.session.progress();
 
     if (sessionInfo) {
       const sessionLength = sessionInfo.sessionLength.toJSON() as number;
@@ -356,7 +357,7 @@ export class PolkadotJsScheduledService {
         const eraEndTimestamp = +(new Date()) + (blockTime * eraBlocksLeft);
 
         const eraItem: PjsCalendarItem = {
-          network,
+          network: this.pa.networks[network],
           type: 'stakingEra',
           startBlockNumber: eraEndBlockNumber,
           startDate: new Date(eraEndTimestamp),
@@ -373,7 +374,7 @@ export class PolkadotJsScheduledService {
         const nextSessionIndex = (sessionInfo.currentIndex.toJSON() as number) + 1;
 
         const epochItem: PjsCalendarItem = {
-          network,
+          network: this.pa.networks[network],
           type: 'stakingEpoch',
           endBlockNumber: sessionEndBlockNumber,
           endDate: new Date(sessionEndTimestamp),
@@ -387,7 +388,11 @@ export class PolkadotJsScheduledService {
         let slashDuration: number | undefined;
 
         try {
-          slashDeferDuration = (await Promise.resolve(this.pa.run(network).consts.staking.slashDeferDuration) as u32).toJSON() as number;
+          slashDeferDuration = (
+            await Promise.resolve(
+              this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.staking.slashDeferDuration
+            ) as u32
+          ).toJSON() as number;
 
           if (slashDeferDuration) {
             slashDuration = slashDeferDuration * eraLength;
@@ -397,7 +402,7 @@ export class PolkadotJsScheduledService {
         }
 
         if (slashDuration !== undefined) {
-          const unappliedSlashes = await this.pa.run(network).query.staking.unappliedSlashes.entries() as [{ args: [EraIndex] }, UnappliedSlash[]][];
+          const unappliedSlashes = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).query.staking.unappliedSlashes.entries() as [{ args: [EraIndex] }, UnappliedSlash[]][];
           if (unappliedSlashes) {
             unappliedSlashes.forEach(([{args}, values]) => {
               if (values.length) {
@@ -408,7 +413,7 @@ export class PolkadotJsScheduledService {
                 const slashEndTimestamp = +(new Date()) + (blockTime * slashBlocksLeft);
 
                 const slashItem: PjsCalendarItem = {
-                  network,
+                  network: this.pa.networks[network],
                   type: 'stakingSlash',
                   endBlockNumber: slashEndBlockNumber,
                   endDate: new Date(slashEndTimestamp),
@@ -428,7 +433,7 @@ export class PolkadotJsScheduledService {
   async fetchScheduled(network: string, blockNumber: number): Promise<void> {
     const blockTime = this.getBlockTime(network);
 
-    const scheduled = await this.pa.run(network).query.scheduler.agenda.entries() as [{ args: [BlockNumber] }, Option<Scheduled>[]][];
+    const scheduled = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).query.scheduler.agenda.entries() as [{ args: [BlockNumber] }, Option<Scheduled>[]][];
 
     if (scheduled) {
       scheduled.forEach(([key, scheduledOptions]) => {
@@ -443,7 +448,7 @@ export class PolkadotJsScheduledService {
             const id = idOrNull ? idOrNull.isAscii ? idOrNull.toUtf8() : idOrNull.toHex() : null;
 
             const item: PjsCalendarItem = {
-              network,
+              network: this.pa.networks[network],
               type: 'scheduler',
               endBlockNumber: scheduledBlockNumber,
               endDate: new Date(endTimestamp),
@@ -459,9 +464,9 @@ export class PolkadotJsScheduledService {
 
   async fetchCouncilElection(network: string, blockNumber: number): Promise<void> {
     const responses = await Promise.allSettled([
-      this.pa.run(network).consts.elections,
-      this.pa.run(network).consts.phragmenElection,
-      this.pa.run(network).consts.electionsPhragmen
+      this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.elections,
+      this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.phragmenElection,
+      this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.electionsPhragmen
     ]);
     const response = responses.find((r) => r.status === "fulfilled") as PromiseFulfilledResult<QueryableModuleConsts>;
     if (!response) {
@@ -478,7 +483,7 @@ export class PolkadotJsScheduledService {
       }
 
       const item: PjsCalendarItem = Object.assign({
-        network: network,
+        network: this.pa.networks[network],
         type: 'councilElection',
         data: {
           electionRound: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
@@ -490,7 +495,7 @@ export class PolkadotJsScheduledService {
   }
 
   async fetchDemocracyLaunch(network: string, blockNumber: number): Promise<void> {
-    const duration = await this.pa.run(network).consts.democracy.launchPeriod as u32;
+    const duration = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.democracy.launchPeriod as u32;
     const itemDuration = this.generateCalendarItemDuration(network, blockNumber, duration.toJSON() as number);
 
     if (itemDuration && itemDuration.endBlockNumber) {
@@ -499,7 +504,7 @@ export class PolkadotJsScheduledService {
       }
 
       const item: PjsCalendarItem = Object.assign({
-        network: network,
+        network: this.pa.networks[network],
         type: 'democracyLaunch',
         data: {
           launchPeriod: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
@@ -511,7 +516,7 @@ export class PolkadotJsScheduledService {
   }
 
   async fetchTreasurySpend(network: string, blockNumber: number): Promise<void> {
-    const duration = await this.pa.run(network).consts.treasury.spendPeriod as u32;
+    const duration = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.treasury.spendPeriod as u32;
     const itemDuration = this.generateCalendarItemDuration(network, blockNumber, duration.toJSON() as number);
 
     if (itemDuration && itemDuration.endBlockNumber) {
@@ -520,7 +525,7 @@ export class PolkadotJsScheduledService {
       }
 
       const item: PjsCalendarItem = Object.assign({
-        network: network,
+        network: this.pa.networks[network],
         type: 'treasurySpend',
         data: {
           spendingPeriod: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
@@ -532,7 +537,7 @@ export class PolkadotJsScheduledService {
   }
 
   async fetchSocietyRotate(network: string, blockNumber: number): Promise<void> {
-    const duration = await this.pa.run(network).consts.society.rotationPeriod as u32;
+    const duration = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.society.rotationPeriod as u32;
     const itemDuration = this.generateCalendarItemDuration(network, blockNumber, duration.toJSON() as number);
 
     if (itemDuration) {
@@ -541,7 +546,7 @@ export class PolkadotJsScheduledService {
       }
 
       const item: PjsCalendarItem = Object.assign({
-        network: network,
+        network: this.pa.networks[network],
         type: 'societyRotate',
         data: {
           rotateRound: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
@@ -553,7 +558,7 @@ export class PolkadotJsScheduledService {
   }
 
   async fetchSocietyChallenge(network: string, blockNumber: number): Promise<void> {
-    const duration = await this.pa.run(network).consts.society.challengePeriod as u32;
+    const duration = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.society.challengePeriod as u32;
     const itemDuration = this.generateCalendarItemDuration(network, blockNumber, duration.toJSON() as number);
 
     if (itemDuration && itemDuration.endBlockNumber) {
@@ -562,7 +567,7 @@ export class PolkadotJsScheduledService {
       }
 
       const item: PjsCalendarItem = Object.assign({
-        network: network,
+        network: this.pa.networks[network],
         type: 'societyChallenge',
         data: {
           challengePeriod: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number))
@@ -574,15 +579,15 @@ export class PolkadotJsScheduledService {
   }
 
   async fetchParachainLease(network: string, blockNumber: number): Promise<void> {
-    const duration = await this.pa.run(network).consts.slots.leasePeriod as LeasePeriod;
-    const offset = await this.pa.run(network).consts.slots.leaseOffset as u32;
+    const duration = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.slots.leasePeriod as LeasePeriod;
+    const offset = await this.pa.run({chain: network, adapters: this.pa.networks[network].substrateRpc}).consts.slots.leaseOffset as u32;
     const itemDuration = this.generateCalendarItemDuration(network, blockNumber, duration.toJSON() as number, offset.toJSON() as number);
 
     if (itemDuration && itemDuration.endBlockNumber) {
       this.setLowestBlockHeight(network, itemDuration.endBlockNumber, blockNumber);
 
       const item: PjsCalendarItem = Object.assign({
-        network: network,
+        network: this.pa.networks[network],
         type: 'parachainLease',
         data: {
           leasePeriod: Math.floor((itemDuration.startBlockNumber as number) / (itemDuration.duration as number)) + 1

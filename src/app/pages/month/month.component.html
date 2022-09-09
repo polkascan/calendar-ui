@@ -2,23 +2,27 @@
   <div class="month-calendar-container">
 
     <div class="month-toolbar">
-      <button mat-stroked-button [routerLink]="'/month/' + ((prevMonthDate | async) | date : 'yyyy-MM-dd')">Previous Month</button>
-      <h2>{{selectedDate | date: 'MMMM yyyy'}}</h2>
-      <button mat-stroked-button [routerLink]="'/month/' + ((nextMonthDate | async) | date : 'yyyy-MM-dd')">Next Month</button>
+      <button mat-stroked-button [routerLink]="'/month/' + ((prevMonthDate | async) | date : 'yyyy-MM-dd')">
+        <span>Previous</span><span class="extra-text"> Month</span>
+      </button>
+      <h2 class="month-toolbar-date-header">{{selectedDate | date: 'MMMM yyyy'}}</h2>
+      <button mat-stroked-button [routerLink]="'/month/' + ((nextMonthDate | async) | date : 'yyyy-MM-dd')">
+        <span>Next</span><span class="extra-text"> Month</span>
+      </button>
     </div>
 
     <div class="month-calendar">
       <div class="month-calendar-header-row">
-        <div class="month-calendar-header-column">Monday</div>
-        <div class="month-calendar-header-column">Tuesday</div>
-        <div class="month-calendar-header-column">Wednesday</div>
-        <div class="month-calendar-header-column">Thursday</div>
-        <div class="month-calendar-header-column">Friday</div>
-        <div class="month-calendar-header-column">Saturday</div>
-        <div class="month-calendar-header-column">Sunday</div>
+        <div class="month-calendar-header-column"><span>Mo</span><span class="extra-text">nday</span></div>
+        <div class="month-calendar-header-column"><span>Tu</span><span class="extra-text">esday</span></div>
+        <div class="month-calendar-header-column"><span>We</span><span class="extra-text">dnesday</span></div>
+        <div class="month-calendar-header-column"><span>Th</span><span class="extra-text">ursday</span></div>
+        <div class="month-calendar-header-column"><span>Fr</span><span class="extra-text">iday</span></div>
+        <div class="month-calendar-header-column"><span>Sa</span><span class="extra-text">turday</span></div>
+        <div class="month-calendar-header-column"><span>Su</span><span class="extra-text">nday</span></div>
       </div>
-      <div class="month-calendar-row" *ngFor="let row of (columnsPerRow | async)">
-        <div class="month-calendar-column" *ngFor="let column of row"
+      <div class="month-calendar-row" *ngFor="let row of (columnsPerRow | async); trackBy: trackByIndex">
+        <div class="month-calendar-column" *ngFor="let column of row; trackBy: trackByIndex"
              [class]="'month-calendar-' + (column.date | date : 'yyyy-MM-dd')"
              [class.month-calendar-column--previous-month]="column.inPrevMonth"
              [class.month-calendar-column--next-month]="column.inNextMonth"
@@ -26,19 +30,25 @@
              [class.month-calendar-column--next-year]="column.inNextYear"
              [class.month-calendar-column--past]="+column.date < +today"
              [class.month-calendar-column--selected]="+column.date === +selectedDate"
-             [class.month-calendar-column--today]="+column.date === +today">
+             [class.month-calendar-column--today]="+column.date === +today"
+             [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')">
           <div class="month-calendar-column-label">
             <button mat-flat-button class="month-calendar-column-label-button" [routerLink]="'/day/' + (column.date | date : 'yyyy-MM-dd')">
               {{ column.isFirstDayOfMonth ? (column.date | date : 'MMM') : '' }}
               {{ column.date | date : 'd'}}{{ column.isFirstDayOfYear ? (column.date | date : ', yyyy') : '' }}
             </button>
           </div>
-          <ng-container *ngFor="let hourItems of (column.hoursWithItems | async)">
-            <div tabindex="0" *ngFor="let item of hourItems"
-                 [class]="'month-calendar-item month-calendar-item-type--' + item.type + ' month-calendar-item-network--' + item.network" [style.--ps-month-calendar-item-background-color]="chainColors[item.network]">
-              <span class="month-calendar-item-time">{{ item.date | date : 'HH:mm' }}</span>
-              <span class="month-calendar-item-block">{{ item.block }}</span>
-              <span class="month-calendar-item-description">{{ item.description }}</span>
+          <ng-container *ngFor="let hourItems of (column.hoursWithItems | async); trackBy: trackByIndex">
+            <div tabindex="0" *ngFor="let item of hourItems; trackBy: trackByIndex"
+                 [class]="'month-calendar-item month-calendar-item-type--' + item.type + ' month-calendar-item-network--' + item.network.name"
+                 [style.--ps-month-calendar-item-background-color]="chainColors[item.network.name]">
+              <div class="month-calendar-item-time">{{ item.date | date : 'HH:mm' }}</div>
+              <div class="month-calendar-item-logo">
+                <img *ngIf="item.network.config.logo" [src]="item.network.config.logo" alt="Logo">
+                <span class="month-calendar-item-logo-custom" *ngIf="!item.network.config.logo">{{ item.network.config.name.substring(0, 2) }}</span>
+              </div>
+              <div class="month-calendar-item-block">{{ item.block }}</div>
+              <div class="month-calendar-item-description">{{ item.description }}</div>
             </div>
           </ng-container>
         </div>

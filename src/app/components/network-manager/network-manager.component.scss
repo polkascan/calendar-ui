@@ -1,0 +1,83 @@
+.network-manager {
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+}
+
+.network-list {
+  flex: 0 1 auto;
+}
+
+.add-network {
+  margin-bottom: 8px;
+}
+
+.network-list-item {
+  display: flex;
+  padding: 3px 0 3px 8px;
+  flex-flow: row nowrap;
+  align-items: center;
+  cursor: pointer;
+
+  &:hover {
+    background: #eee;
+  }
+
+  > * {
+    flex: 0 0 auto;
+  }
+
+  .network-list-item-label {
+    flex: 1 1 auto;
+  }
+}
+
+.network-list-item--selected {
+  background: #444;
+  color: #fff;
+
+  &:hover {
+    background: #777;
+  }
+}
+
+.network-list-item-checkbox {
+  margin-right: 8px;
+}
+
+.network-properties {
+  flex: 1 1 auto;
+  position: relative;
+  padding-left: 2em;
+}
+
+.network-properties-chain {
+  position: sticky;
+  top: 0;
+}
+
+.network-properties-chain-name {
+  font-size: 1.3em;
+}
+
+.network-properties-chain-state,
+.network-properties-activate-box {
+  margin-bottom: 1em;
+}
+
+.network-properties-provider mat-form-field {
+  width: 400px;
+}
+
+.network-list-item--failed .network-list-item-label {
+  text-decoration: line-through;
+  color: var(--ps-text-error-color);
+}
+
+.network-properties-chain--failed {
+  color: var(--ps-text-error-color);
+}
+
+.network-list-item--selected .network-list-item--failed .network-list-item-label {
+    color: #fff;
+}

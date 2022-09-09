@@ -17,7 +17,7 @@
  */
 
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { filter, interval, map, Observable, shareReplay, startWith, takeUntil } from 'rxjs';
+import { delay, filter, interval, map, Observable, of, shareReplay, startWith, switchMap } from 'rxjs';
 
 export function getLocalDateString(date: Date): string {
   return `${date.getFullYear()}-${('0' + String(date.getMonth() + 1)).slice(-2)}-${('0' + String(date.getDate())).slice(-2)}`;
@@ -51,11 +51,18 @@ export function getDateFromRoute(router: Router, route: ActivatedRoute): Observa
 }
 
 export function getCurrentTime(): Observable<Date> {
-  return interval(1000 * 60).pipe(
-    startWith(0),
-    map<number, Date>(() => new Date()),
+  const now = new Date();
+  return of(now).pipe(
+    switchMap((date) => {
+      return interval(1000 * 60).pipe(
+        startWith(0),
+        delay((60 - date.getSeconds()) * 1000),
+        map<number, Date>(() => new Date())
+      );
+    }),
+    startWith(now),
     shareReplay(1)
-  );
+  )
 }
 
 export function getDayProgressPercentage(date: Observable<Date>) {
@@ -63,6 +70,15 @@ export function getDayProgressPercentage(date: Observable<Date>) {
     map<Date, string>((date) => {
       const minutesPassed = date.getMinutes() + (60 * date.getHours());
       return `${Math.round(minutesPassed / (24 * 60) * 1000) / 10}%`;
+    })
+  );
+}
+
+export function getHourProgressPercentage(date: Observable<Date>) {
+  return date.pipe(
+    map<Date, string>((date) => {
+      const minutesPassed = date.getMinutes();
+      return `${Math.round((minutesPassed / 60) * 100)}%`;
     })
   );
 }

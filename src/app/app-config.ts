@@ -19,13 +19,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-type NetworkConfig = {
-  [network: string]: {
-    name: string;
-    color: string;
-    substrateRpcUrlArray: string[];
-  };
+export type NetworkConfig = {
+  [network: string]: RelayChainConfig;
 };
+
+export type RelayChainConfig = {
+  substrateRpcUrls: { [name: string]: string };
+  name: string;
+  defaultActive?: boolean;
+  color?: string;
+  homepage?: string;
+  logo?: string
+  parachains?: { [network: string]: ParachainConfig };
+};
+
+export type ParachainConfig = RelayChainConfig & {
+  paraId: number;
+  common?: boolean;
+  parachains?: { [network: string]: ParachainConfig };
+}
 
 type Config = {
   network: NetworkConfig,

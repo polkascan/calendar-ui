@@ -19,10 +19,10 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { distinctUntilChanged, map, Observable, Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
+import { getCurrentTime, getDateFromRoute, getHourProgressPercentage, getTodayDate } from '../../services/helpers';
 import { DateColumn } from '../types';
 import { CalendarService } from '../../services/calendar.service';
-import { AppConfig } from '../../app-config';
+import { PolkadaptService } from '../../services/polkadapt.service';
 
 @Component({
   selector: 'app-day',
@@ -39,14 +39,14 @@ export class DayComponent implements OnInit, OnDestroy {
   currentTime: Observable<Date>;
   timeLinePerc: Observable<string>;
   hours: Observable<Date[]>;
-  chainColors: {[network: string]: string} = {};
+  chainColors: {[network: string]: string | undefined} = {};
 
   private destroyer = new Subject<void>();
 
   constructor(private router: Router,
               private route: ActivatedRoute,
               private cal: CalendarService,
-              private config: AppConfig) {
+              private pa: PolkadaptService) {
   }
 
   ngOnInit(): void {
@@ -59,7 +59,7 @@ export class DayComponent implements OnInit, OnDestroy {
       map<Date, DateColumn>((date) => {
         const dateColumn: DateColumn = {
           date: date,
-          hoursWithItems: this.cal.getEventItemsPerHour(date)
+          hoursWithItems: this.cal.getFilteredItemsPerHour(date)
         };
 
         const dayCount = date.getDate();
@@ -106,15 +106,23 @@ export class DayComponent implements OnInit, OnDestroy {
     );
 
     this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
-    this.timeLinePerc = getDayProgressPercentage(this.currentTime);
+    this.timeLinePerc = getHourProgressPercentage(this.currentTime);
 
-    for (const n of Object.keys(this.config.networks)) {
-      this.chainColors[n] =  this.config.networks[n].color;
+    for (const n of Object.keys(this.pa.networks)) {
+      this.chainColors[n] =  this.pa.networks[n].config.color;
     }
   }
 
   ngOnDestroy(): void {
     this.destroyer.next();
     this.destroyer.complete();
+  }
+
+  trackByHour(i: number): number {
+    return i;
+  }
+
+  trackByHourItems(i: number): number {
+    return i;
   }
 }

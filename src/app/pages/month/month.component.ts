@@ -16,13 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getDateFromRoute, getTodayDate } from '../../services/helpers';
-import { DateColumn, EventItem } from '../types';
+import { DateColumn } from '../types';
 import { CalendarService } from '../../services/calendar.service';
 import { AppConfig } from '../../app-config';
+import { PolkadaptService } from '../../services/polkadapt.service';
 
 @Component({
   selector: 'app-month',
@@ -30,7 +31,7 @@ import { AppConfig } from '../../app-config';
   styleUrls: ['./month.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MonthComponent implements OnInit, OnDestroy {
   destroyer = new Subject<void>();
   date: Observable<Date>;
   dates: Observable<DateColumn[]>;
@@ -38,12 +39,13 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
   today: Date;
   prevMonthDate: Observable<Date>;
   nextMonthDate: Observable<Date>;
-  chainColors: {[network: string]: string} = {};
+  chainColors: {[network: string]: string | undefined} = {};
 
   constructor(private router: Router,
               private route: ActivatedRoute,
               private cal: CalendarService,
               private config: AppConfig,
+              private pa: PolkadaptService,
               private host: ElementRef<HTMLElement>) {
   }
 
@@ -81,7 +83,7 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
             date: prevDate,
             inPrevMonth: true,
             inPrevYear: hasPrevYear,
-            hoursWithItems: this.cal.getEventItemsPerHour(prevDate),
+            hoursWithItems: this.cal.getFilteredItemsPerHour(prevDate),
           });
           p--;
         }
@@ -112,7 +114,7 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
             dateColumn.inNextMonth = true;
             dateColumn.inNextYear = hasNextYear;
           }
-          dateColumn.hoursWithItems = this.cal.getEventItemsPerHour(nextDate);
+          dateColumn.hoursWithItems = this.cal.getFilteredItemsPerHour(nextDate);
           dates.push(dateColumn);
           a++;
         }
@@ -136,31 +138,17 @@ export class MonthComponent implements OnInit, AfterViewInit, OnDestroy {
       map((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
     );
 
-    for (const n of Object.keys(this.config.networks)) {
-      this.chainColors[n] =  this.config.networks[n].color;
+    for (const n of Object.keys(this.pa.networks)) {
+      this.chainColors[n] =  this.pa.networks[n].config.color;
     }
-  }
-
-  ngAfterViewInit(): void {
-    this.date.subscribe(date => {
-      let m: string = (date.getMonth() + 1).toString();
-      if (m.length === 1) {
-        m = '0' + m;
-      }
-      let d: string = date.getDate().toString();
-      if (d.length === 1) {
-        d = '0' + d;
-      }
-      const dateStr = `${date.getFullYear()}-${m}-${d}`;
-      const dateEl: HTMLElement | null = this.host.nativeElement.querySelector(`.month-calendar-${dateStr}`);
-      if (dateEl) {
-        dateEl.scrollIntoView({behavior: 'smooth', block: 'end'});
-      }
-    });
   }
 
   ngOnDestroy(): void {
     this.destroyer.next();
     this.destroyer.complete();
+  }
+
+  trackByIndex(i: number): number {
+    return i;
   }
 }

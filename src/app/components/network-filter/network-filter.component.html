@@ -1,0 +1,66 @@
+<!--
+~ Polkascan Calendar UI
+~ Copyright (C) 2018-2022 Polkascan Foundation (NL)
+~
+~ This program is free software: you can redistribute it and/or modify
+~ it under the terms of the GNU General Public License as published by
+~ the Free Software Foundation, either version 3 of the License, or
+~ (at your option) any later version.
+~
+~ This program is distributed in the hope that it will be useful,
+~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~ GNU General Public License for more details.
+~
+~ You should have received a copy of the GNU General Public License
+~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+<mat-expansion-panel class="network-filter" hideToggle [expanded]="panelOpenState"
+                     (opened)="panelOpenState = true"
+                     (closed)="panelOpenState = false">
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      Networks
+    </mat-panel-title>
+    <mat-icon aria-hidden="true" class="network-filter-expand-icon">
+      <span class="material-symbols-outlined">{{ panelOpenState ? 'expand_more' : 'expand_less' }}</span>
+    </mat-icon>
+  </mat-expansion-panel-header>
+
+  <button mat-stroked-button class="network-filter-open-network-manager" (click)="openNetworkManager()" title="Network Manager">
+    <mat-icon aria-hidden="false" aria-label="Manage networks">settings</mat-icon>
+    Networks
+  </button>
+  <button mat-stroked-button class="network-filter-reset" title="Reset filter" (click)="fs.resetNetworkFilter()">
+    <mat-icon aria-hidden="true" class="network-filter-reset-icon">
+      <span class="material-symbols-outlined">replay</span>
+    </mat-icon>
+  </button>
+
+  <div class="network-filter-item" *ngFor="let network of ns.activeNetworks | async"
+       [style.--ps-network-filter-item-color]="network.config.color"
+       [class.network-filter-item--loading]="(network.initializing | async) || (network.loading | async)"
+       [class.network-filter-item--failed]="(network.failed | async)">
+
+    <div class="network-filter-item-logo">
+      <img *ngIf="network.config.logo" [src]="network.config.logo" alt="Logo">
+      <span class="network-filter-item-logo-custom"
+            *ngIf="!network.config.logo">{{ network.config.name.substring(0, 2) }}</span>
+    </div>
+    <div class="network-filter-item-name">{{network.config.name}}</div>
+    <div class="network-filter-item-button">
+      <button mat-icon-button *ngIf="{value: fs.hiddenNetworks.indexOf(network.name) !== -1 } as hidden"
+              (click)="fs.toggleNetworkVisibility(network.name)">
+        <mat-icon aria-hidden="true" class="network-filter-visibility-icon"
+                  [class.network-filter-visibility-icon--on]="!hidden.value"
+                  [class.network-filter-visibility-icon--off]="hidden.value"
+                  [style]="!hidden.value ? 'color: ' + network.config.color : ''">
+          <span class="material-symbols-outlined">{{ !hidden.value ? 'visibility' : 'visibility_off' }}</span>
+        </mat-icon>
+      </button>
+    </div>
+
+  </div>
+</mat-expansion-panel>

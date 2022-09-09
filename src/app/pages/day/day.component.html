@@ -3,7 +3,7 @@
     <div class="day-toolbar">
       <button mat-stroked-button [routerLink]="'/day/' + ((prevDayDate | async) | date : 'yyyy-MM-dd')">Previous Day
       </button>
-      <h2>{{dateColumn.date | date : 'd MMMM yyyy'}}</h2>
+      <h2 class="day-toolbar-date-header">{{dateColumn.date | date : 'd MMMM yyyy'}}</h2>
       <button mat-stroked-button [routerLink]="'/day/' + ((nextDayDate | async) | date : 'yyyy-MM-dd')">Next Day
       </button>
     </div>
@@ -12,31 +12,41 @@
       <div class="day-calendar-header-row">
       </div>
 
-      <div class="day-calendar-rows">
-        <div class="day-calendar-row-lines">
-          <div class="day-calendar-row-line" *ngFor="let hour of hours | async; let i = index">
-            <div class="day-calendar-timezone" *ngIf="i === 0">{{ hour | date : 'zzz' }}</div>
-            <div class="day-calendar-row-time" *ngIf="i < 23">{{ hour | date: 'HH:mm' }}</div>
-          </div>
-        </div>
-
-        <div class="day-calendar-columns-line"></div>
+      <div class="day-calendar-hour"
+           *ngFor="let hourItems of (dateColumn.hoursWithItems | async); trackBy: trackByHour, let i = index">
 
         <ng-container *ngIf="dateColumn.isToday">
-          <div class="day-calendar-current-time-indicator" [style.top]="timeLinePerc | async">
-            <div class="day-calendar-current-time">
-              {{ (this.currentTime | async) | date: 'HH:mm' }}
-            </div>
+          <ng-container *ngIf="(this.currentTime | async) as ct">
+            <ng-container *ngIf="ct.getHours() === i">
+              <div class="day-calendar-current-time-indicator" [style.top]="timeLinePerc | async">
+                <div class="day-calendar-current-time">
+                  {{ ct | date: 'HH:mm' }}
+                </div>
+              </div>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="(hours | async) as hrs">
+          <div class="day-calendar-timezone" *ngIf="i === 0">{{ hrs[i] | date : 'zzz' }}</div>
+          <div class="day-calendar-row-line">
+            <div class="day-calendar-row-time" *ngIf="i < 23">{{ hrs[i] | date: 'HH:mm' }}</div>
           </div>
         </ng-container>
-      </div>
 
-      <div class="day-calendar-hour" *ngFor="let hourItems of (dateColumn.hoursWithItems | async)">
-        <div *ngFor="let item of hourItems" [attr.class]="'day-calendar-item day-calendar-item-network--' + item.network + ' day-calendar-item-type--' + item.type"
-             [style.--ps-day-calendar-item-background-color]="chainColors[item.network]">
-          <span class="day-calendar-item-time">{{ item.date | date: 'HH:mm' }}</span>
-          <span class="day-calendar-item-block">{{ item.block }}</span>
-          <span class="day-calendar-item-description">{{ item.description }}</span>
+        <div *ngIf="hourItems.length === 0" class="day-calendar-row-empty-item"></div>
+
+        <div *ngFor="let item of hourItems; trackBy: trackByHourItems"
+             [attr.class]="'day-calendar-item day-calendar-item-network--' + item.network.name + ' day-calendar-item-type--' + item.type"
+             [style.--ps-day-calendar-item-background-color]="chainColors[item.network.name]"
+             [title]="item.network.config.name">
+          <div class="day-calendar-item-logo">
+            <img *ngIf="item.network.config.logo" [src]="item.network.config.logo" alt="Logo">
+            <span class="day-calendar-item-logo-custom" *ngIf="!item.network.config.logo">{{ item.network.config.name.substring(0, 2) }}</span>
+          </div>
+          <div class="day-calendar-item-block">{{ item.block }}</div>
+          <div class="day-calendar-item-time">{{ item.date | date: 'HH:mm' }}</div>
+          <div class="day-calendar-item-description">{{ item.description }}</div>
         </div>
       </div>
     </div>

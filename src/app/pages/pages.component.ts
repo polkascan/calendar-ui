@@ -30,7 +30,6 @@ import { MatCalendar, MatCalendarCellClassFunction } from '@angular/material/dat
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { getLocalDateString, getTodayDate } from '../services/helpers';
 import { CalendarService } from '../services/calendar.service';
-import { AppConfig } from '../app-config';
 
 const viewNames = ['month', 'week', 'day'] as const;
 type ViewName = typeof viewNames[number];
@@ -51,7 +50,7 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   date = new BehaviorSubject<Date | null>(null);
   view = new BehaviorSubject<ViewName>('month');
   navProperties = new BehaviorSubject<NavProperties | null>(null);
-  networkConfig = new Map();
+  menuVisible = new BehaviorSubject<boolean>(window.matchMedia('(min-width: 1265px)').matches);
 
   @ViewChild('calendar', {static: false}) calendar: MatCalendar<Date>;
 
@@ -75,16 +74,11 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private cal: CalendarService,
-    private config: AppConfig
+    private cal: CalendarService
   ) {
   }
 
   ngOnInit(): void {
-    for (const n of Object.keys(this.config.networks)) {
-      this.networkConfig.set(n, this.config.networks[n]);
-    }
-
     // Determine whether we need to change the url to selected selectedDate and view.
     this.navProperties.pipe(
       filter((p): p is NavProperties => !!p),  // Start processing after the properties have been initialized.
@@ -119,7 +113,7 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
         const dateString = String(params['date']);
         // Like the selectedDate picker, this selectedDate string has to be parsed as local time, achieved by adding
         // the time *without* timezone offset. (It's interpreted as UTC if we parse the selectedDate only.)
-        let date = new Date(dateString+'T00:00:00');
+        let date = new Date(dateString + 'T00:00:00');
         // Check selectedDate for validity, by casting it to number by prefixing with a plus (+) sign.
         // If selectedDate is NaN, it's invalid, and we return the current selectedDate.
         date = isNaN(+date) ? getTodayDate() : date;
@@ -182,6 +176,10 @@ export class PagesComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyer.next();
     this.destroyer.complete();
+  }
+
+  toggleMenu(): void {
+    this.menuVisible.next(!this.menuVisible.value);
   }
 
   selectView(view: ViewName): void {

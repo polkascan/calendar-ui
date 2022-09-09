@@ -19,16 +19,24 @@
 import { Injectable } from '@angular/core';
 import { CalenderItemsPerChain, PolkadotJsScheduledService } from './polkadot-js-scheduled.service';
 import { EventItem } from '../pages/types';
-import { BehaviorSubject, map, Observable, startWith, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, map, Observable, startWith, Subject, Subscription } from 'rxjs';
 import { getLocalDateString } from './helpers';
+
+type FilterFunction = (item: EventItem) => boolean;
+
+type FilterDef = {
+  [name: string]: FilterFunction
+};
 
 @Injectable({providedIn: 'root'})
 export class CalendarService {
   eventItemsChanged = new Subject<void>();
   eventItemsSubscription: Subscription;
   private eventItems: { [date: string]: BehaviorSubject<EventItem[]> } = {};
+  private activeFilters = new BehaviorSubject<FilterDef>({});
 
   constructor(private pjss: PolkadotJsScheduledService) {
+
     this.eventItemsSubscription = this.pjss.dataChanged.pipe(
       startWith(this.pjss.calendarItemsPerChain),
     ).subscribe((calenderItemsPerChain) => {
@@ -63,20 +71,51 @@ export class CalendarService {
             block,
             type: ci.type,
             description: this.getPjsItemDescription(ci.type, ci.data),
-            data: ci.data
+            data: ci.data,
           }
           byDate[dateKey].push(item);
         }
       });
     });
+
+    // If there are no more items on a specific date, empty the observables value;
+    for (const dateKey of Object.keys(this.eventItems)) {
+      if (!(dateKey in byDate)) {
+        this.getEventItems(dateKey).next([]);
+      }
+    }
+
+    // Add items to their date containers.
     for (const [dateKey, items] of Object.entries(byDate)) {
       this.getEventItems(dateKey).next(items);
     }
   }
 
-  getEventItemsPerHour(date: Date): Observable<EventItem[][]> {
+  setFilter(name: string, filter: FilterFunction): void {
+    this.activeFilters.value[name] = filter;
+    this.activeFilters.next(this.activeFilters.value);
+  }
+
+  removeFilter(name: string): void {
+    delete this.activeFilters.value[name];
+    this.activeFilters.next(this.activeFilters.value);
+  }
+
+  getFilteredItems(date: string): Observable<EventItem[]> {
+    return this.getEventItems(date).pipe(
+      combineLatestWith(this.activeFilters),
+      map<[EventItem[], FilterDef], EventItem[]>(([items, filters]): EventItem[] => {
+        for (const f of Object.values(filters)) {
+          items = items.filter(f);
+        }
+        return items;
+      })
+    );
+  }
+
+  getFilteredItemsPerHour(date: Date): Observable<EventItem[][]> {
     const dateKey: string = getLocalDateString(date);
-    return this.getEventItems(dateKey).pipe(
+    return this.getFilteredItems(dateKey).pipe(
       map<EventItem[], EventItem[][]>(items => {
         const itemsPerHour: EventItem[][] = [];
         for (let i = 0; i < 24; i++) {

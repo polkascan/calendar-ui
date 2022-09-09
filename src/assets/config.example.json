@@ -1,0 +1,62 @@
+{
+  "network": {
+    "polkadot": {
+      "name": "Polkadot",
+      "defaultActive": true,
+      "color": "#e6007a",
+      "logo": "/assets/logos/polkadot-circle.svg",
+      "substrateRpcUrls": {
+        "Parity": "wss://rpc.polkadot.io",
+        "OnFinality": "wss://polkadot.api.onfinality.io/public-ws",
+        "Dwellir": "wss://polkadot-rpc.dwellir.com",
+        "Pinknode": "wss://public-rpc.pinknode.io/polkadot",
+        "RadiumBlock": "wss://polkadot.public.curie.radiumblock.io/ws"
+      },
+      "parachains": {
+        "statemint": {
+          "paraId": 1000,
+          "color": "#86e62a",
+          "name": "Statemint",
+          "common": true,
+          "logo": "/assets/logos/statemine.svg",
+          "substrateRpcUrls": {
+            "Parity": "wss://statemint-rpc.polkadot.io",
+            "OnFinality": "wss://statemint.api.onfinality.io/public-ws",
+            "Dwellir": "wss://statemint-rpc.dwellir.com",
+            "Pinknode": "wss://public-rpc.pinknode.io/statemint"
+          }
+        },
+        "acala": {
+          "homepage": "https://acala.network/",
+          "defaultActive": true,
+          "color": "#645AFF",
+          "paraId": 2000,
+          "name": "Acala",
+          "logo": "/assets/logos/acala.svg",
+          "substrateRpcUrls": {
+            "Acala Foundation 0": "wss://acala-rpc-0.aca-api.network",
+            "Acala Foundation 1": "wss://acala-rpc-1.aca-api.network",
+            "Acala Foundation 3": "wss://acala-rpc-3.aca-api.network/ws",
+            "Polkawallet 0": "wss://acala.polkawallet.io",
+            "OnFinality": "wss://acala-polkadot.api.onfinality.io/public-ws",
+            "Dwellir": "wss://acala-rpc.dwellir.com"
+          }
+        }
+      }
+    },
+    "kusama": {
+      "name": "Kusama",
+      "defaultActive": true,
+      "color": "#000000",
+      "logo": "/assets/logos/kusama-128.gif",
+      "substrateRpcUrls": {
+        "Parity": "wss://kusama-rpc.polkadot.io",
+        "OnFinality": "wss://kusama.api.onfinality.io/public-ws",
+        "Dwellir": "wss://kusama-rpc.dwellir.com",
+        "RadiumBlock": "wss://kusama.public.curie.radiumblock.co/ws",
+        "Pinknode": "wss://public-rpc.pinknode.io/kusama"
+      },
+      "parachains": {}
+    }
+  }
+}

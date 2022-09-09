@@ -17,12 +17,12 @@
  */
 
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { getCurrentTime, getDateFromRoute, getDayProgressPercentage, getTodayDate } from '../../services/helpers';
+import { getCurrentTime, getDateFromRoute, getHourProgressPercentage, getTodayDate } from '../../services/helpers';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, distinctUntilChanged, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { DateColumn } from '../types';
 import { CalendarService } from '../../services/calendar.service';
-import { AppConfig } from '../../app-config';
+import { PolkadaptService } from '../../services/polkadapt.service';
 
 @Component({
   selector: 'app-week',
@@ -42,13 +42,13 @@ export class WeekComponent implements OnInit, OnDestroy {
   currentTime: Observable<Date>;
   timeLinePerc: Observable<string>;
   calendarStyle = new BehaviorSubject<'fixed' | 'fluid'>('fixed');
-  chainColors: {[network: string]: string} = {};
+  chainColors: {[network: string]: string | undefined} = {};
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private cal: CalendarService,
-    private config: AppConfig) {
+    private pa: PolkadaptService) {
   }
 
   ngOnInit(): void {
@@ -86,7 +86,7 @@ export class WeekComponent implements OnInit, OnDestroy {
           date,
           isFirstDayOfMonth: date.getDate() === 1,
           isFirstDayOfYear: date.getMonth() === 0,
-          hoursWithItems: this.cal.getEventItemsPerHour(date),
+          hoursWithItems: this.cal.getFilteredItemsPerHour(date),
         };
       })),
       shareReplay(1)
@@ -111,10 +111,10 @@ export class WeekComponent implements OnInit, OnDestroy {
     );
 
     this.currentTime = getCurrentTime().pipe(takeUntil(this.destroyer));
-    this.timeLinePerc = getDayProgressPercentage(this.currentTime);
+    this.timeLinePerc = getHourProgressPercentage(this.currentTime);
 
-    for (const n of Object.keys(this.config.networks)) {
-      this.chainColors[n] =  this.config.networks[n].color;
+    for (const n of Object.keys(this.pa.networks)) {
+      this.chainColors[n] =  this.pa.networks[n].config.color;
     }
   }
 
@@ -123,4 +123,7 @@ export class WeekComponent implements OnInit, OnDestroy {
     this.destroyer.complete();
   }
 
+  trackByIndex(i: number): number {
+    return i;
+  }
 }
